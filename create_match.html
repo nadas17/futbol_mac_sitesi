@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeni Maç Oluştur</title>
     <!-- Use the official Supabase library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,7 +39,7 @@
         input[type="time"],
         input[type="number"],
         textarea {
-            width: calc(100% - 22px); /* Padding ve border için hesaplama */
+            width: calc(100% - 22px); /* Ensures the input field fits within its container by subtracting 10px padding on each side and 1px border on each side */
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
@@ -50,7 +50,7 @@
             resize: vertical;
             min-height: 80px;
         }
-        button[type="submit"] { /* Sadece submit butonu için */
+        button[type="submit"] { /* For the submit button only */
             background-color: #007bff;
             color: white;
             padding: 12px 20px;
@@ -139,7 +139,7 @@
             const location = document.getElementById('location').value;
             const max_players = parseInt(document.getElementById('max_players').value);
             const priceInput = document.getElementById('price_per_player').value;
-            const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
+            const price_per_player = priceInput === '' ? null : parseFloat(priceInput);
             const description = document.getElementById('description').value || null;
 
             const { data, error } = await supabase
@@ -157,20 +157,42 @@
                     }
                 ]);
 
+            if (error) {
+                if (error.code === '23505') { // Example: Duplicate entry
+                    showMessage('Bu başlıkla zaten bir maç mevcut. Lütfen farklı bir başlık seçin.', 'error');
+                } else if (error.code === '23514') { // Example: Invalid data constraint
+                // Error occurred while creating the match
+                console.error('Maç oluşturulurken hata oluştu:', error);
+                } else {
+                    console.error('Maç oluşturulurken hata oluştu:', error);
+                    showMessage('Maç oluşturulamadı: ' + error.message, 'error');
+                }
+                return;
+            }
+
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
 
             if (error) {
-                console.error('Maç oluşturulurken hata oluştu:', error);
                 showMessage('Maç oluşturulamadı: ' + error.message, 'error');
             } else {
                 showMessage('Maç başarıyla oluşturuldu!', 'success');
                 form.reset();
-                setTimeout(() => {
+                // Kullanıcı tarafından tetiklenen yönlendirme
+                const redirectButton = document.createElement('button');
+                redirectButton.textContent = 'Ana Sayfaya Git';
+                redirectButton.style.marginTop = '10px';
+                redirectButton.style.padding = '10px 20px';
+                redirectButton.style.backgroundColor = '#007bff';
+                redirectButton.style.color = 'white';
+                redirectButton.style.border = 'none';
+                redirectButton.style.borderRadius = '5px';
+                redirectButton.style.cursor = 'pointer';
+                redirectButton.addEventListener('click', () => {
                     window.location.href = 'index.html';
-                }, 2000); // 2 saniye sonra ana sayfaya yönlendir
+                });
+                messageDiv.appendChild(redirectButton);
             }
-        
         });
 
         function showMessage(msg, type) {
