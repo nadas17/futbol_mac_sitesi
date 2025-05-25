@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeni Maç Oluştur</title>
     <!-- Use the official Supabase library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -127,7 +127,7 @@
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); 
-            // ...
+
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
@@ -139,7 +139,7 @@
             const location = document.getElementById('location').value;
             const max_players = parseInt(document.getElementById('max_players').value);
             const priceInput = document.getElementById('price_per_player').value;
-            const price_per_player = priceInput === '' ? null : parseFloat(priceInput);
+            const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
             const description = document.getElementById('description').value || null;
 
             const { data, error } = await supabase
@@ -156,19 +156,6 @@
                         current_players: 0
                     }
                 ]);
-
-            if (error) {
-                if (error.code === '23505') { // Example: Duplicate entry
-                    showMessage('Bu başlıkla zaten bir maç mevcut. Lütfen farklı bir başlık seçin.', 'error');
-                } else if (error.code === '23514') { // Example: Invalid data constraint
-                // Error occurred while creating the match
-                console.error('Maç oluşturulurken hata oluştu:', error);
-                } else {
-                    console.error('Maç oluşturulurken hata oluştu:', error);
-                    showMessage('Maç oluşturulamadı: ' + error.message, 'error');
-                }
-                return;
-            }
 
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
