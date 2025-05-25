@@ -103,7 +103,7 @@
             <label for="max_players">Maksimum Kişi Sayısı:</label>
             <input type="number" id="max_players" name="max_players" min="1" required>
 
-            <label for="price_per_player">Ücret (TL/kişi, opsiyonel):</label>
+            <label for="price_per_player">Ücret (PLN/kişi, opsiyonel):</label>
             <input type="number" id="price_per_player" name="price_per_player" min="0" step="0.01">
 
             <label for="description">Açıklama (opsiyonel):</label>
@@ -126,8 +126,8 @@
         const messageDiv = document.getElementById('form-message');
 
         form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
+            event.preventDefault(); 
+            // ...
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
@@ -166,7 +166,11 @@
             } else {
                 showMessage('Maç başarıyla oluşturuldu!', 'success');
                 form.reset();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000); // 2 saniye sonra ana sayfaya yönlendir
             }
+        
         });
 
         function showMessage(msg, type) {
