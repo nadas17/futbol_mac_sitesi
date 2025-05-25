@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maç Organizasyon Sitesi</title>
-    <!-- Supabase JS kütüphanesini burada çağırıyoruz -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
@@ -44,13 +43,53 @@
             font-size: 1em;
             margin-top: 10px;
         }
-        .join-match-btn:hover {
+        .join-match-btn:hover:not(:disabled) { /* :disabled olmayanlar için hover */
             background-color: #218838;
+        }
+        .join-match-btn:disabled { /* Dolu maçlar için stil */
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .participants-list {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        .participants-list h4 {
+            margin-bottom: 5px;
+            color: #0056b3;
+        }
+        .participants-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex; /* Yan yana gelmesi için */
+            flex-wrap: wrap; /* Sığmazsa alta geçmesi için */
+            gap: 5px; /* Aralarında boşluk */
+        }
+        .participants-list li {
+            background-color: #e9e9e9;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
         }
         hr {
             border: 0;
             border-top: 1px solid #eee;
             margin: 20px 0;
+        }
+        .admin-link { /* Yeni Maç Oluştur linki için stil */
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            margin-bottom: 20px; /* Altına biraz boşluk */
+        }
+        .admin-link:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -60,56 +99,182 @@
     <p>Burası web sitemizin başlangıç noktası. Yakında harika maçlar organize edeceğiz!</p>
     <p>Bizi izlemeye devam edin...</p>
 
-    <!-- Maçların görüntüleneceği div -->
+    <p><a href="create_match.html" class="admin-link">Yeni Maç Oluştur</a></p>
+
     <div id="matches-container">
         <h2>Yaklaşan Maçlar</h2>
         <p>Maçlar yükleniyor...</p>
     </div>
 
-    <!-- Kendi JavaScript kodunuzu buraya yerleştirin -->
     <script>
-        // BURAYA KENDİ SUPABASE URL VE ANON KEY BİLGİLERİNİ GİRİN!
-        const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // Örn: https://abcdefghijkl.supabase.co
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I'; 
+        // !!! KENDİ SUPABASE URL VE ANON KEY BİLGİLERİNİZİ GİRİN !!!
+        const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co'; // KENDİ URL'NİZİ GİRİN
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // KENDİ ANON KEY'İNİZİ GİRİN
 
-        // Supabase client'ını oluşturma
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function fetchMatches() {
             const matchesContainer = document.getElementById('matches-container');
-            
-            let { data: matches, error } = await supabase
-                .from('matches') // Supabase'deki tablonuzun adı
-                .select('*') // Tüm sütunları seç
-                .order('match_date', { ascending: true }) // Tarihe göre artan sırada sırala
-                .order('match_time', { ascending: true }); // Saate göre artan sırada sırala
+            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2><p>Maçlar yükleniyor...</p>'; // Her yenilemede temizle ve yükleniyor göster
 
-            // Önceki içeriği temizle ve başlığı tekrar ekle
-            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2>';
+            // Maçları çek
+            let { data: matches, error: matchesError } = await supabase
+                .from('matches')
+                .select('*') // current_players sütununu da dahil et
+                .order('match_date', { ascending: true })
+                .order('match_time', { ascending: true });
 
-            if (error) {
-                console.error('Maçlar çekilirken hata oluştu:', error);
+            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2>'; // Başlığı koru
+
+            if (matchesError) {
+                console.error('Maçlar çekilirken hata oluştu:', matchesError);
                 matchesContainer.innerHTML += '<p>Maçlar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
-            } else if (matches && matches.length > 0) {
-                matches.forEach(match => {
+                return;
+            }
+
+            if (matches && matches.length > 0) {
+                for (const match of matches) {
+                    // Her maç için katılımcıları çek
+                    let { data: participants, error: participantsError } = await supabase
+                        .from('match_participants')
+                        .select('participant_name')
+                        .eq('match_id', match.id)
+                        .order('created_at', { ascending: true });
+
+                    if (participantsError) {
+                        console.error(`Maç ${match.id} için katılımcılar çekilirken hata:`, participantsError);
+                        participants = []; // Hata durumunda boş dizi ata
+                    }
+
                     const matchElement = document.createElement('div');
                     matchElement.className = 'match-card';
+                    
+                    let participantsHtml = '';
+                    const currentParticipantCount = participants ? participants.length : 0; // Gerçek katılımcı sayısı
+
+                    if (participants && participants.length > 0) {
+                        const participantNames = participants.map(p => `<li>${p.participant_name}</li>`).join('');
+                        participantsHtml = `
+                            <div class="participants-list">
+                                <h4>Katılımcılar (${currentParticipantCount}/${match.max_players}):</h4>
+                                <ul>${participantNames}</ul>
+                            </div>
+                        `;
+                    } else {
+                        participantsHtml = `
+                            <div class="participants-list">
+                                <h4>Katılımcılar (0/${match.max_players}):</h4>
+                                <p>Henüz katılan yok.</p>
+                            </div>
+                        `;
+                    }
+
+                    const isMatchFull = currentParticipantCount >= match.max_players;
+
                     matchElement.innerHTML = `
                         <h3>${match.title}</h3>
                         <p><strong>Tarih:</strong> ${new Date(match.match_date).toLocaleDateString('tr-TR')}</p>
                         <p><strong>Saat:</strong> ${match.match_time.substring(0, 5)}</p>
                         <p><strong>Konum:</strong> ${match.location}</p>
-                        <p><strong>Kişi Sayısı:</strong> ${match.max_players} kişi</p>
+                        <p><strong>Kişi Sayısı:</strong> ${currentParticipantCount} / ${match.max_players} kişi</p>
                         <p><strong>Ücret:</strong> ${match.price_per_player ? match.price_per_player + ' TL/kişi' : 'Ücretsiz'}</p>
                         <p>${match.description || ''}</p>
-                        <button class="join-match-btn" data-match-id="${match.id}">Maça Katıl</button>
+                        ${participantsHtml}
+                        <button class="join-match-btn" data-match-id="${match.id}" ${isMatchFull ? 'disabled' : ''}>
+                            ${isMatchFull ? 'Maç Dolu' : 'Maça Katıl'}
+                        </button>
                         <hr>
                     `;
                     matchesContainer.appendChild(matchElement);
+                }
+
+                // Düğmelere event listener ekle
+                document.querySelectorAll('.join-match-btn').forEach(button => {
+                    if (!button.disabled) {
+                        button.addEventListener('click', async (event) => {
+                            const matchId = event.target.dataset.matchId;
+                            await addParticipantToMatch(matchId);
+                        });
+                    }
                 });
+
             } else {
                 matchesContainer.innerHTML += '<p>Şu anda yaklaşan maç bulunmamaktadır.</p>';
             }
+        }
+
+        async function addParticipantToMatch(matchId) {
+            const participantName = prompt("Maça katılmak için adınızı girin:");
+
+            if (!participantName || participantName.trim() === '') {
+                alert("Lütfen geçerli bir isim girin.");
+                return;
+            }
+
+            // Önce maçın güncel durumunu kontrol et (başka biri aynı anda katılmış olabilir)
+            const { data: currentMatch, error: fetchMatchError } = await supabase
+                .from('matches')
+                .select('current_players, max_players')
+                .eq('id', matchId)
+                .single();
+
+            if (fetchMatchError) {
+                console.error('Maç bilgisi çekilirken hata oluştu:', fetchMatchError);
+                alert('Maç durumu kontrol edilirken bir hata oluştu, lütfen tekrar deneyin.');
+                return;
+            }
+            
+            // Katılımcıları da çekip sayısını kontrol edelim, current_players sütununa güvenmek yerine
+            const { data: currentParticipants, error: fetchParticipantsError } = await supabase
+                .from('match_participants')
+                .select('id', { count: 'exact' }) // Sadece sayısını almak için
+                .eq('match_id', matchId);
+
+            if (fetchParticipantsError) {
+                console.error('Katılımcı sayısı çekilirken hata oluştu:', fetchParticipantsError);
+                alert('Katılımcı sayısı kontrol edilirken bir hata oluştu, lütfen tekrar deneyin.');
+                return;
+            }
+            
+            const actualParticipantCount = currentParticipants ? currentParticipants.length : 0;
+
+
+            if (actualParticipantCount >= currentMatch.max_players) {
+                alert('Üzgünüz, bu maç siz katılmaya çalışırken doldu!');
+                fetchMatches(); // UI'ı güncelle
+                return;
+            }
+
+            // 1. Katılımcıyı match_participants tablosuna ekle
+            const { error: participantInsertError } = await supabase
+                .from('match_participants')
+                .insert([ { match_id: matchId, participant_name: participantName.trim() } ]);
+
+            if (participantInsertError) {
+                console.error('Katılımcı eklenirken hata oluştu:', participantInsertError);
+                alert('Maça katılırken bir hata oluştu: ' + participantInsertError.message);
+                return;
+            }
+
+            // 2. matches tablosundaki current_players sayısını artır
+            // Bu adımı, katılımcı sayısını match_participants'tan saydığımız için
+            // opsiyonel hale getirebiliriz veya trigger ile Supabase tarafında yaptırabiliriz.
+            // Şimdilik JS tarafında güncelleyelim.
+            const newPlayerCount = actualParticipantCount + 1; // Yeni katılımcı eklendiği için +1
+
+            const { error: updateError } = await supabase
+                .from('matches')
+                .update({ current_players: newPlayerCount })
+                .eq('id', matchId);
+
+            if (updateError) {
+                // Bu hata kritik değil, katılımcı eklendi ama sayaç güncellenemedi.
+                // Kullanıcıya bilgi verilebilir veya sadece loglanabilir.
+                console.warn('Oyuncu sayısı güncellenirken hata oluştu (katılımcı eklendi):', updateError);
+            }
+
+            alert(`${participantName.trim()} olarak maça katıldınız!`);
+            fetchMatches(); // UI'ı yenile
         }
 
         // Sayfa yüklendiğinde maçları çek
