@@ -178,20 +178,11 @@
             } else {
                 showMessage('Maç başarıyla oluşturuldu!', 'success');
                 form.reset();
-                // Kullanıcı tarafından tetiklenen yönlendirme
-                const redirectButton = document.createElement('button');
-                redirectButton.textContent = 'Ana Sayfaya Git';
-                redirectButton.style.marginTop = '10px';
-                redirectButton.style.padding = '10px 20px';
-                redirectButton.style.backgroundColor = '#007bff';
-                redirectButton.style.color = 'white';
-                redirectButton.style.border = 'none';
-                redirectButton.style.borderRadius = '5px';
-                redirectButton.style.cursor = 'pointer';
-                redirectButton.addEventListener('click', () => {
+
+                // Redirect to the index page after a short delay
+                setTimeout(() => {
                     window.location.href = 'index.html';
-                });
-                messageDiv.appendChild(redirectButton);
+                }, 2000); // Redirect after 2 seconds
             }
         });
 
