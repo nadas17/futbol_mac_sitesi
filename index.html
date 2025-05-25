@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maç Organizasyon Sitesi</title>
-     <script src="libs/supabase-js.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -106,33 +108,35 @@
     </div>
 
     <script>
-        // !!! KENDİ SUPABASE URL VE ANON KEY BİLGİLERİNİZİ GİRİN !!!
-    const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // KENDİ URL'NİZİ GİRİN
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I';
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Replace these with your actual Supabase credentials
+    const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // Your Supabase URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I'; // Your Supabase Anon Key
 
-        async function fetchMatches() {
-            const matchesContainer = document.getElementById('matches-container');
-            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2><p>Maçlar yükleniyor...</p>'; // Her yenilemede temizle ve yükleniyor göster
+    // Initialize the Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // Maçları çek
-            let { data: matches, error: matchesError } = await supabase
-                .from('matches')
-                .select('*') // current_players sütununu da dahil et
-                .order('match_date', { ascending: true })
-                .order('match_time', { ascending: true });
+    async function fetchMatches() {
+        const matchesContainer = document.getElementById('matches-container');
+        matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2><p>Maçlar yükleniyor...</p>'; // Clear and show loading message
 
-            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2>'; // Başlığı koru
+        // Fetch matches
+        let { data: matches, error: matchesError } = await supabase
+            .from('matches')
+            .select('*') // Include all columns
+            .order('match_date', { ascending: true })
+            .order('match_time', { ascending: true });
 
-            if (matchesError) {
-                console.error('Maçlar çekilirken hata oluştu:', matchesError);
-                matchesContainer.innerHTML += '<p>Maçlar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
-                return;
-            }
+        matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2>'; // Keep the header
 
-            if (matches && matches.length > 0) {
-                for (const match of matches) {
-                    // Her maç için katılımcıları çek
+        if (matchesError) {
+            console.error('Error fetching matches:', matchesError);
+            matchesContainer.innerHTML += '<p>Maçlar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
+            return;
+        }
+
+        if (matches && matches.length > 0) {
+            for (const match of matches) {
+                // Her maç için katılımcıları çek
                     let { data: participants, error: participantsError } = await supabase
                         .from('match_participants')
                         .select('participant_name')

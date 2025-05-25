@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeni Maç Oluştur</title>
-    <script src="libs/supabase-js.min.js"></script>
+    <!-- Use the official Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -114,18 +115,19 @@
     </div>
 
     <script>
-  // !!! KENDİ SUPABASE URL VE ANON KEY BİLGİLERİNİZİ GİRİN !!!
-const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // KENDİ URL'NİZİ GİRİN
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I';
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Replace these with your actual Supabase credentials
+        const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I';
+
+        // Initialize the Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const form = document.getElementById('create-match-form');
-        const messageDiv = document.getElementById('form-message'); // ID'yi güncelledim
+        const messageDiv = document.getElementById('form-message');
 
         form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Formun varsayılan gönderimini engelle
+            event.preventDefault();
 
-            // Butonu geçici olarak devre dışı bırak ve metnini değiştir
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
             submitButton.disabled = true;
@@ -136,7 +138,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
             const match_time = document.getElementById('match_time').value;
             const location = document.getElementById('location').value;
             const max_players = parseInt(document.getElementById('max_players').value);
-            // price_per_player boşsa veya 0 ise null olarak ayarla, değilse float olarak al
             const priceInput = document.getElementById('price_per_player').value;
             const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
             const description = document.getElementById('description').value || null;
@@ -145,19 +146,17 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
                 .from('matches')
                 .insert([
                     {
-                        title: title,
-                        match_date: match_date,
-                        match_time: match_time,
-                        location: location,
-                        max_players: max_players,
-                        price_per_player: price_per_player,
-                        description: description,
-                        current_players: 0 // Yeni maçta katılan oyuncu sayısı 0 olmalı
+                        title,
+                        match_date,
+                        match_time,
+                        location,
+                        max_players,
+                        price_per_player,
+                        description,
+                        current_players: 0
                     }
-                ])
-                .select(); // Eklenen veriyi geri döndürmek için .select() eklendi (opsiyonel ama iyi bir pratik)
+                ]);
 
-            // Butonu tekrar aktif et ve orijinal metnine döndür
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
 
@@ -166,20 +165,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
                 showMessage('Maç oluşturulamadı: ' + error.message, 'error');
             } else {
                 showMessage('Maç başarıyla oluşturuldu!', 'success');
-                form.reset(); // Formu sıfırla
-                // İsteğe bağlı: 2 saniye sonra ana sayfaya yönlendir
-                // setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                form.reset();
             }
         });
 
         function showMessage(msg, type) {
             messageDiv.textContent = msg;
-            messageDiv.className = `message ${type}`; // Sadece 'message' ve type sınıfını uygula
+            messageDiv.className = `message ${type}`;
             messageDiv.style.display = 'block';
-            // Mesajı birkaç saniye sonra otomatik gizleme (isteğe bağlı)
-            // setTimeout(() => {
-            //     messageDiv.style.display = 'none';
-            // }, 7000); // 7 saniye sonra mesajı gizle
         }
     </script>
 </body>
