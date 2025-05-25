@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maç Organizasyon Sitesi</title>
+    <!-- Supabase JS kütüphanesini burada çağırıyoruz -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
@@ -20,89 +21,99 @@
             font-size: 1.2em;
         }
         .match-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    margin: 20px auto; /* Ortalamak için */
-    max-width: 600px; /* Genişliği sınırlamak için */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    text-align: left; /* Metni sola hizala */
-}
-.match-card h3 {
-    color: #0056b3;
-    margin-top: 0;
-}
-.join-match-btn {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    margin-top: 10px;
-}
-.join-match-btn:hover {
-    background-color: #218838;
-}
-hr {
-    border: 0;
-    border-top: 1px solid #eee;
-    margin: 20px 0;
-}
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto; /* Ortalamak için */
+            max-width: 600px; /* Genişliği sınırlamak için */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: left; /* Metni sola hizala */
+        }
+        .match-card h3 {
+            color: #0056b3;
+            margin-top: 0;
+        }
+        .join-match-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+        .join-match-btn:hover {
+            background-color: #218838;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
     </style>
 </head>
-<scrip<script>
-    // BURAYA KENDİ SUPABASE URL VE ANON KEY BİLGİLERİNİ GİRİN!
-    const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // Örn: https://abcdefghijkl.supabase.co
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I
-'; 
-
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function fetchMatches() {
-        let { data: matches, error } = await supabase
-            .from('matches') // Supabase'deki tablonuzun adı
-            .select('*') // Tüm sütunları seç
-            .order('match_date', { ascending: true }) // Tarihe göre artan sırada sırala
-            .order('match_time', { ascending: true }); // Saate göre artan sırada sırala
-
-        const matchesContainer = document.getElementById('matches-container');
-        matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2>'; // Başlığı koru
-
-        if (error) {
-            console.error('Maçlar çekilirken hata oluştu:', error);
-            matchesContainer.innerHTML += '<p>Maçlar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
-        } else if (matches && matches.length > 0) {
-            matches.forEach(match => {
-                const matchElement = document.createElement('div');
-                matchElement.className = 'match-card'; // CSS için bir sınıf ekleyebiliriz
-                matchElement.innerHTML = `
-                    <h3>${match.title}</h3>
-                    <p><strong>Tarih:</strong> ${new Date(match.match_date).toLocaleDateString('tr-TR')}</p>
-                    <p><strong>Saat:</strong> ${match.match_time.substring(0, 5)}</p>
-                    <p><strong>Konum:</strong> ${match.location}</p>
-                    <p><strong>Kişi Sayısı:</strong> ${match.max_players} kişi</p>
-                    <p><strong>Ücret:</strong> ${match.price_per_player ? match.price_per_player + ' TL/kişi' : 'Ücretsiz'}</p>
-                    <p>${match.description || ''}</p>
-                    <button class="join-match-btn" data-match-id="${match.id}">Maça Katıl</button>
-                    <hr>
-                `;
-                matchesContainer.appendChild(matchElement);
-            });
-        } else {
-            matchesContainer.innerHTML += '<p>Şu anda yaklaşan maç bulunmamaktadır.</p>';
-        }
-    }
-
-    // Sayfa yüklendiğinde maçları çek
-    fetchMatches();
-</script>t></script>
 <body>
 
     <h1>Futbol Maçı Organizasyon Sitesi'ne Hoş Geldiniz!</h1>
     <p>Burası web sitemizin başlangıç noktası. Yakında harika maçlar organize edeceğiz!</p>
     <p>Bizi izlemeye devam edin...</p>
+
+    <!-- Maçların görüntüleneceği div -->
+    <div id="matches-container">
+        <h2>Yaklaşan Maçlar</h2>
+        <p>Maçlar yükleniyor...</p>
+    </div>
+
+    <!-- Kendi JavaScript kodunuzu buraya yerleştirin -->
+    <script>
+        // BURAYA KENDİ SUPABASE URL VE ANON KEY BİLGİLERİNİ GİRİN!
+        const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // Örn: https://abcdefghijkl.supabase.co
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I'; 
+
+        // Supabase client'ını oluşturma
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function fetchMatches() {
+            const matchesContainer = document.getElementById('matches-container');
+            
+            let { data: matches, error } = await supabase
+                .from('matches') // Supabase'deki tablonuzun adı
+                .select('*') // Tüm sütunları seç
+                .order('match_date', { ascending: true }) // Tarihe göre artan sırada sırala
+                .order('match_time', { ascending: true }); // Saate göre artan sırada sırala
+
+            // Önceki içeriği temizle ve başlığı tekrar ekle
+            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2>';
+
+            if (error) {
+                console.error('Maçlar çekilirken hata oluştu:', error);
+                matchesContainer.innerHTML += '<p>Maçlar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
+            } else if (matches && matches.length > 0) {
+                matches.forEach(match => {
+                    const matchElement = document.createElement('div');
+                    matchElement.className = 'match-card';
+                    matchElement.innerHTML = `
+                        <h3>${match.title}</h3>
+                        <p><strong>Tarih:</strong> ${new Date(match.match_date).toLocaleDateString('tr-TR')}</p>
+                        <p><strong>Saat:</strong> ${match.match_time.substring(0, 5)}</p>
+                        <p><strong>Konum:</strong> ${match.location}</p>
+                        <p><strong>Kişi Sayısı:</strong> ${match.max_players} kişi</p>
+                        <p><strong>Ücret:</strong> ${match.price_per_player ? match.price_per_player + ' TL/kişi' : 'Ücretsiz'}</p>
+                        <p>${match.description || ''}</p>
+                        <button class="join-match-btn" data-match-id="${match.id}">Maça Katıl</button>
+                        <hr>
+                    `;
+                    matchesContainer.appendChild(matchElement);
+                });
+            } else {
+                matchesContainer.innerHTML += '<p>Şu anda yaklaşan maç bulunmamaktadır.</p>';
+            }
+        }
+
+        // Sayfa yüklendiğinde maçları çek
+        fetchMatches();
+    </script>
 </body>
 </html>
