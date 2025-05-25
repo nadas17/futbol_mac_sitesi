@@ -93,17 +93,81 @@
         .admin-link:hover {
             background-color: #0056b3;
         }
+        /* Add these styles to your existing <style> section */
+        .layout-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .countdown {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .countdown-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        .stats-container {
+            margin-top: 20px;
+        }
+
+        .stats-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-item:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Futbol Maçı Organizasyon Sitesi'ne Hoş Geldiniz!</h1>
-        <p>Bu site, futbol maçları organize etmek ve katılmak isteyenler için bir platformdur.</p>
-        <p><a href="create_match.html" class="admin-link">Yeni Maç Oluştur</a></p>
+    <div class="layout-container">
+        <div class="main-content">
+            <h1>Futbol Maçı Organizasyon Sitesi'ne Hoş Geldiniz!</h1>
+            <p>Bu site, futbol maçları organize etmek ve katılmak isteyenler için bir platformdur.</p>
+            <p><a href="create_match.html" class="admin-link">Yeni Maç Oluştur</a></p>
 
-        <div id="matches-container">
-            <h2>Yaklaşan Maçlar</h2>
-            <p>Maçlar yükleniyor...</p>
+            <div id="matches-container">
+                <h2>Yaklaşan Maçlar</h2>
+                <p>Maçlar yükleniyor...</p>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div id="next-match-countdown" class="countdown">
+                <h3>Sıradaki Maç</h3>
+                <div class="countdown-number">
+                    <span id="days">00</span>g
+                    <span id="hours">00</span>s
+                    <span id="minutes">00</span>d
+                    <span id="seconds">00</span>sn
+                </div>
+                <div id="next-match-info"></div>
+            </div>
+
+            <div class="stats-container">
+                <h3>Katılımcı İstatistikleri</h3>
+                <div id="participant-stats">
+                    Yükleniyor...
+                </div>
+            </div>
         </div>
     </div>
 
@@ -203,6 +267,250 @@
             } else {
                 matchesContainer.innerHTML += '<p>Şu anda yaklaşan maç bulunmamaktadır.</p>';
             }
+        }
+
+        async function addParticipantToMatch(matchId) {
+            const participantName = prompt("Maça katılmak için adınızı girin:");
+
+            if (!participantName || participantName.trim() === '') {
+                alert("Lütfen geçerli bir isim girin.");
+                return;
+            }
+
+            // Önce maçın güncel durumunu kontrol et (başka biri aynı anda katılmış olabilir)
+            const { data: currentMatch, error: fetchMatchError } = await supabase
+                .from('matches')
+                .select('current_players, max_players')
+                .eq('id', matchId)
+                .single();
+
+            if (fetchMatchError) {
+                console.error('Maç bilgisi çekilirken hata oluştu:', fetchMatchError);
+                alert('Maç durumu kontrol edilirken bir hata oluştu, lütfen tekrar deneyin.');
+                return;
+            }
+            
+            // Katılımcıları da çekip sayısını kontrol edelim, current_players sütununa güvenmek yerine
+            const { data: currentParticipants, error: fetchParticipantsError } = await supabase
+                .from('match_participants')
+                .select('id', { count: 'exact' }) // Sadece sayısını almak için
+                .eq('match_id', matchId);
+
+            if (fetchParticipantsError) {
+                console.error('Katılımcı sayısı çekilirken hata oluştu:', fetchParticipantsError);
+                alert('Katılımcı sayısı kontrol edilirken bir hata oluştu, lütfen tekrar deneyin.');
+                return;
+            }
+            
+            const actualParticipantCount = currentParticipants ? currentParticipants.length : 0;
+
+
+            if (actualParticipantCount >= currentMatch.max_players) {
+                alert('Üzgünüz, bu maç siz katılmaya çalışırken doldu!');
+                fetchMatches(); // UI'ı güncelle
+                return;
+            }
+
+            // 1. Katılımcıyı match_participants tablosuna ekle
+            const { error: participantInsertError } = await supabase
+                .from('match_participants')
+                .insert([ { match_id: matchId, participant_name: participantName.trim() } ]);
+
+            if (participantInsertError) {
+                console.error('Katılımcı eklenirken hata oluştu:', participantInsertError);
+                alert('Maça katılırken bir hata oluştu: ' + participantInsertError.message);
+                return;
+            }
+
+            // 2. matches tablosundaki current_players sayısını artır
+            // Bu adımı, katılımcı sayısını match_participants'tan saydığımız için
+            // opsiyonel hale getirebiliriz veya trigger ile Supabase tarafında yaptırabiliriz.
+            // Şimdilik JS tarafında güncelleyelim.
+            const newPlayerCount = actualParticipantCount + 1; // Yeni katılımcı eklendiği için +1
+
+            const { error: updateError } = await supabase
+                .from('matches')
+                .update({ current_players: newPlayerCount })
+                .eq('id', matchId);
+
+            if (updateError) {
+                // Bu hata kritik değil, katılımcı eklendi ama sayaç güncellenemedi.
+                // Kullanıcıya bilgi verilebilir veya sadece loglanabilir.
+                console.warn('Oyuncu sayısı güncellenirken hata oluştu (katılımcı eklendi):', updateError);
+            }
+
+            alert(`${participantName.trim()} olarak maça katıldınız!`);
+            fetchMatches(); // UI'ı yenile
+        }
+
+        // Add this code to your existing <script> section
+        async function updateCountdown(matches) {
+            if (!matches || matches.length === 0) {
+                document.getElementById('next-match-countdown').innerHTML = 
+                    '<h3>Sıradaki Maç</h3><p>Yaklaşan maç bulunmamaktadır.</p>';
+                return;
+            }
+
+            const nextMatch = matches[0]; // İlk maç (en yakın tarihli)
+            const matchDate = new Date(`${nextMatch.match_date}T${nextMatch.match_time}`);
+            const nextMatchInfo = document.getElementById('next-match-info');
+            
+            nextMatchInfo.innerHTML = `
+                <p>${nextMatch.title}</p>
+                <p>${matchDate.toLocaleDateString('tr-TR')} - ${nextMatch.match_time.substring(0, 5)}</p>
+            `;
+
+            function updateTimer() {
+                const now = new Date();
+                const distance = matchDate - now;
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById('days').textContent = String(days).padStart(2, '0');
+                document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+
+                if (distance < 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('next-match-countdown').innerHTML = 
+                        '<h3>Sıradaki Maç</h3><p>Maç başladı!</p>';
+                }
+            }
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        async function updateParticipantStats() {
+            const { data: stats, error } = await supabase
+                .from('match_participants')
+                .select('participant_name')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('İstatistikler yüklenirken hata:', error);
+                return;
+            }
+
+            // Katılımcıların maç sayılarını hesapla
+            const participantCounts = {};
+            stats.forEach(participant => {
+                participantCounts[participant.participant_name] = 
+                    (participantCounts[participant.participant_name] || 0) + 1;
+            });
+
+            // En çok katılan ilk 5 kişiyi göster
+            const topParticipants = Object.entries(participantCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+
+            const statsHtml = topParticipants
+                .map(([name, count]) => `
+                    <div class="stats-item">
+                        <strong>${name}</strong>: ${count} maç
+                    </div>
+                `)
+                .join('');
+
+            document.getElementById('participant-stats').innerHTML = statsHtml || 'Henüz katılım yok.';
+        }
+
+        // Modify your existing fetchMatches function to include these updates
+        async function fetchMatches() {
+            const matchesContainer = document.getElementById('matches-container');
+            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2><p>Maçlar yükleniyor...</p>'; // Clear and show loading message
+
+            // Fetch matches
+            let { data: matches, error: matchesError } = await supabase
+            .from('matches')
+            .select('*') // Include all columns
+            .order('match_date', { ascending: true })
+            .order('match_time', { ascending: true });
+
+            matchesContainer.innerHTML = '<h2>Yaklaşan Maçlar</h2>'; // Keep the header
+
+            if (matchesError) {
+            console.error('Error fetching matches:', matchesError);
+            matchesContainer.innerHTML += '<p>Maçlar yüklenemedi. Lütfen daha sonra tekrar deneyin.</p>';
+            return;
+            }
+
+            if (matches && matches.length > 0) {
+            for (const match of matches) {
+                // Fetch participants for each match
+                let { data: participants, error: participantsError } = await supabase
+                .from('match_participants')
+                .select('participant_name')
+                .eq('match_id', match.id)
+                .order('created_at', { ascending: true });
+
+                if (participantsError) {
+                console.error(`Error fetching participants for match ${match.id}:`, participantsError);
+                participants = []; // Assign empty array in case of error
+                }
+
+                const matchElement = document.createElement('div');
+                matchElement.className = 'match-card';
+
+                let participantsHtml = '';
+                const currentParticipantCount = participants ? participants.length : 0; // Actual participant count
+
+                if (participants && participants.length > 0) {
+                const participantNames = participants.map(p => `<li>${p.participant_name}</li>`).join('');
+                participantsHtml = `
+                    <div class="participants-list">
+                    <h4>Katılımcılar (${currentParticipantCount}/${match.max_players}):</h4>
+                    <ul>${participantNames}</ul>
+                    </div>
+                `;
+                } else {
+                participantsHtml = `
+                    <div class="participants-list">
+                    <h4>Katılımcılar (0/${match.max_players}):</h4>
+                    <p>Henüz katılan yok.</p>
+                    </div>
+                `;
+                }
+
+                const isMatchFull = currentParticipantCount >= match.max_players;
+
+                matchElement.innerHTML = `
+                <h3>${match.title}</h3>
+                <p><strong>Tarih:</strong> ${new Date(match.match_date).toLocaleDateString('tr-TR')}</p>
+                <p><strong>Saat:</strong> ${match.match_time.substring(0, 5)}</p>
+                <p><strong>Konum:</strong> ${match.location}</p>
+                <p><strong>Kişi Sayısı:</strong> ${currentParticipantCount} / ${match.max_players} kişi</p>
+                <p><strong>Ücret:</strong> ${match.price_per_player ? match.price_per_player + ' TL/kişi' : 'Ücretsiz'}</p>
+                <p>${match.description || ''}</p>
+                ${participantsHtml}
+                <button class="join-match-btn" data-match-id="${match.id}" ${isMatchFull ? 'disabled' : ''}>
+                    ${isMatchFull ? 'Maç Dolu' : 'Maça Katıl'}
+                </button>
+                <hr>
+                `;
+                matchesContainer.appendChild(matchElement);
+            }
+
+            // Add event listeners to buttons
+            document.querySelectorAll('.join-match-btn').forEach(button => {
+                if (!button.disabled) {
+                button.addEventListener('click', async (event) => {
+                    const matchId = event.target.dataset.matchId;
+                    await addParticipantToMatch(matchId);
+                });
+                }
+            });
+
+            } else {
+            matchesContainer.innerHTML += '<p>Şu anda yaklaşan maç bulunmamaktadır.</p>';
+            }
+
+            updateCountdown(matches);
+            updateParticipantStats();
         }
 
         async function addParticipantToMatch(matchId) {
