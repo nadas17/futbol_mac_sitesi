@@ -30,7 +30,7 @@ body {
     align-items: center;
     justify-content: center;
     /* Arka plan fotoğrafı ekle */
-    background-image: url('C:/Users/dogkn/Downloads/2.jpg');
+    background-image: url('images/2.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
