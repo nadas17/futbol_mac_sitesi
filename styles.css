@@ -75,7 +75,7 @@ body {
 .sidebar, 
 .countdown, 
 .section-box {
-    background: rgba(15, 2, 131, 0);
+    background: rgba(24, 24, 24, 0.35);
     border-radius: var(--border-radius);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
     padding: 20px;
