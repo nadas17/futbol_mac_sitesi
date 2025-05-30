@@ -342,8 +342,7 @@ button[type="submit"]:hover,
   /* .participants-list ul { display: none; }  Katılımcı listesi gizlenmesin */
 
   .participants-list::after {
-    content: "Katılımcılar";
-    color: #f0f0f0;
+    
     display: block;
     text-align: center;
     margin-top: 10px;
