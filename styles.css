@@ -333,11 +333,19 @@ button[type="submit"]:hover,
         max-width: 98vw;
         font-size: 0.93rem;
     }
-    
+    .section-box {
+    background: rgba(24, 24, 24, 0.35);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1.5px solid #232323;
+}
+    }
     h1 { font-size: 1.4rem; }
     h2 { font-size: 1.25rem; }
     h3 { font-size: 1.1rem; }
-}
+
 /* Removed unnecessary .participants-list::after rule */
 h1, h2, h3 {
     font-family: var(--font-family-primary);
