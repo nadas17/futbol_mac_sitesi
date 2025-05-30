@@ -1,13 +1,13 @@
 /* Root Variables */
 :root {
-    --primary-color: #ff3c6f;
-    --primary-hover: #ff7c2e;
+    --primary-color: #00cc4e;
+    --primary-hover: #02006e;
     --success-bg: #232323;
     --success-border: #3cfa9b;
     --success-text: #3cfa9b;
     --error-bg: #232323;
-    --error-border: #ff3c6f;
-    --error-text: #ff3c6f;
+    --error-border: #ffffff;
+    --error-text: #703cff;
     --bg-light: #181818;
     --bg-dark: #000;
     --border-radius: 14px;
@@ -15,7 +15,7 @@
     --transition-speed: 0.2s;
     --input-bg: #232323;
     --input-border: #333;
-    --input-focus: #ff3c6f;
+    --input-focus: ##00cc4e;
 }
 
 /* Base Styles */
@@ -29,6 +29,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Arka plan fotoğrafı ekle */
+    background-image: url('C:/Users/dogkn/Downloads/2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* Layout Container */
@@ -69,9 +74,9 @@ body {
 .sidebar, 
 .countdown, 
 .section-box {
-    background: var(--bg-light);
+    background: rgba(15, 2, 131, 0);
     border-radius: var(--border-radius);
-    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.45);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
     padding: 20px;
     margin-bottom: 20px;
     border: 1.5px solid #232323;
@@ -251,8 +256,9 @@ button[type="submit"]:hover,
 .participants-list {
     margin-top: 1rem;
     padding: 1rem;
-    background: rgba(30, 30, 30, 0.8);
+    background: rgba(30, 30, 30, 0);
     border-radius: 6px;
+    border: 1.5px solid #232323; /* Katılımcı listesine border */
 }
 
 .participants-list ul {
@@ -263,7 +269,7 @@ button[type="submit"]:hover,
 }
 
 .participants-list li {
-    background: rgba(40, 40, 40, 0.8);
+    background: rgba(207, 188, 188, 0.5);
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 0.95rem;
@@ -272,6 +278,7 @@ button[type="submit"]:hover,
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border: 1px solid #00cc4e; /* Her satıra border */
 }
 
 /* Countdown Timer */
@@ -295,8 +302,8 @@ button[type="submit"]:hover,
 }
 
 .countdown-number span {
-    background: rgba(50, 50, 50, 0.8);
-    padding: 10px 20px;
+    background: rgba(50, 50, 50, 0.5);
+    padding: 5px 10px;
     border-radius: 6px;
     min-width: 3ch;
     display: inline-block;
