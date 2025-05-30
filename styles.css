@@ -258,7 +258,7 @@ button[type="submit"]:hover,
 .participants-list {
     margin-top: 1rem;
     padding: 1rem;
-    background: rgba(30, 30, 30, 0);
+    background: rgba(30, 30, 30, 0.3);
     border-radius: 6px;
     border: 1.5px solid #232323; /* Katılımcı listesine border */
 }
@@ -339,9 +339,7 @@ button[type="submit"]:hover,
     h3 { font-size: 1.1rem; }
 }
 @media (max-width: 480px) {
-  .participants-list ul {
-    display: none;
-  }
+  /* .participants-list ul { display: none; }  Katılımcı listesi gizlenmesin */
 
   .participants-list::after {
     content: "Katılımcı sayısı: X"; /* JS ile dinamik güncelle */
