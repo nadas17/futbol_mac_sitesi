@@ -6,9 +6,12 @@
     <title>Maç Organizasyon Sitesi</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Add Montserrat font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+   
 </head>
 <body>
     <div class="layout-container">
@@ -16,16 +19,21 @@
             <div class="site-title">
                 <h1>Futbol Maçı Organizasyon Sitesi'ne Hoş Geldiniz!</h1>
                 <p>Bu site, futbol maçları organize etmek ve katılmak isteyenler için bir platformdur.</p>
+                <noscript>
+                    <p>Maçları görüntülemek için JavaScript etkinleştirilmelidir.</p>
+                </noscript>
             </div>
 
             <div class="new-match">
                 <a href="create_match.html" class="dynamic-button">Yeni Maç Oluştur</a>
             </div>
 
-            <div class="section-box">
-                <h2>Yaklaşan Maçlar</h2>
-                <div id="matches-container"></div>
-            </div>
+       
+                <!-- Container for dynamically loading matches from the database -->
+                <div id="matches-container">
+                                    
+                    <!-- This will dynamically load matches -->
+                </div>
         </div>
 
         <div class="sidebar">
@@ -47,19 +55,21 @@
                 </div>
                 <div id="next-match-info"></div>
             </div>
+            
         </div>
     </div>
 
-    <a href="create_match.html" class="floating-button" title="Yeni Maç Oluştur">＋</a>
-
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>AOS.init();</script>
-
     <script>
-    const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz...';
+    // Replace these with your actual Supabase credentials
+    const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // Your Supabase URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I'; // Your Supabase Anon Key
+
+    // Initialize Supabase client
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    /**
+     * Fetches matches from the database and displays them on the page.
+     */
     async function fetchMatches() {
         const matchesContainer = document.getElementById('matches-container');
         matchesContainer.innerHTML = '<p>Maçlar yükleniyor...</p>';
@@ -78,16 +88,9 @@
         for (const match of matches) {
             const matchElement = document.createElement('div');
             matchElement.className = 'match-card';
-            matchElement.setAttribute('data-aos', 'fade-up');
-            matchElement.setAttribute('data-aos-delay', '100');
-
-            const matchDateTime = new Date(`${match.match_date}T${match.match_time}`);
-            const isPast = matchDateTime < new Date();
-            const isFull = match.current_players >= match.max_players;
-
             matchElement.innerHTML = `
                 <h3>${match.title}</h3>
-                <p><strong>Tarih:</strong> ${matchDateTime.toLocaleDateString('tr-TR')}</p>
+                <p><strong>Tarih:</strong> ${new Date(match.match_date).toLocaleDateString('tr-TR')}</p>
                 <p><strong>Saat:</strong> ${match.match_time.substring(0, 5)}</p>
                 <p><strong>Konum:</strong> ${match.location}</p>
                 <div class="participants-list">
@@ -100,43 +103,156 @@
                 </div>
                 <button class="join-match-btn" 
                         data-match-id="${match.id}"
-                        ${isPast || isFull ? 'disabled' : ''}>
-                    ${isPast ? 'Geçmiş Maç' : (isFull ? 'Maç Dolu' : 'Maça Katıl')}
+                        ${match.current_players >= match.max_players ? 'disabled' : ''}>
+                    ${match.current_players >= match.max_players ? 'Maç Dolu' : 'Maça Katıl'}
                 </button>
             `;
-
             matchesContainer.appendChild(matchElement);
+
             matchElement.querySelector('.join-match-btn').onclick = () => addParticipantToMatch(match.id);
             fetchParticipants(match.id);
         }
         updateCountdown(matches);
     }
 
-    async function addParticipantToMatch(matchId) {
-        const { data: matchInfo, error: matchFetchError } = await supabase
-            .from('matches')
-            .select('match_date, match_time')
-            .eq('id', matchId)
-            .single();
+    /**
+     * Fetches participants for a specific match and updates the participant list in the UI.
+     * @param {number} matchId - The ID of the match to fetch participants for.
+     */
+    async function fetchParticipants(matchId) {
+        const participantsList = document.getElementById(`participants-${matchId}`);
+        if (!participantsList) return;
 
-        if (matchFetchError) {
-            alert('Maç bilgileri alınamadı.');
+        const { data: participants, error } = await supabase
+            .from('match_participants')
+            .select('*')  // id'yi de almalıyız ki silme işlemi yapabilelim
+            .eq('match_id', matchId)
+            .order('id', { ascending: true });
+
+        if (error) {
+            participantsList.innerHTML = '<li>Katılımcılar yüklenemedi</li>';
             return;
         }
 
-        const matchDateTime = new Date(`${matchInfo.match_date}T${matchInfo.match_time}`);
-        if (matchDateTime < new Date()) {
-            alert('Bu maçın tarihi geçti. Katılamazsınız.');
+        // Update participant count and button state in the UI
+        const matchCard = participantsList.closest('.match-card');
+        if (matchCard) {
+            const countElem = matchCard.querySelector('.participant-count');
+            if (countElem) {
+                countElem.textContent = participants ? participants.length : 0;
+            }
+            
+            const joinButton = matchCard.querySelector('.join-match-btn');
+    const maxPlayers = parseInt(matchCard.querySelector('.participant-count').dataset.maxPlayers);
+            
+            // Update button state
+            if (participants.length >= maxPlayers) {
+                joinButton.disabled = true;
+                joinButton.classList.add('disabled');
+                joinButton.textContent = 'Maç Dolu';
+            } else {
+                joinButton.disabled = false;
+                joinButton.classList.remove('disabled');
+                joinButton.textContent = 'Maça Katıl';
+            }
+        }
+
+        // Update participants list with delete buttons
+        participantsList.innerHTML = participants && participants.length > 0
+            ? participants.map(p => `
+                <li>
+                    ${p.participant_name}
+                    <button class="delete-participant" data-id="${p.id}">
+                        Sil
+                    </button>
+                </li>`).join('')
+            : '<li>Henüz katılımcı yok</li>';
+
+        // Add event listeners to delete buttons
+        participantsList.querySelectorAll('.delete-participant').forEach(button => {
+            button.onclick = () => removeParticipant(button.dataset.id, matchId);
+        });
+    }
+
+    // Katılımcı ekle
+
+    /**
+     * Updates the countdown timer for the next match.
+     * @param {Array} matches - List of matches sorted by date and time.
+     */
+    let timerInterval = null;
+
+async function updateCountdown(matches) {
+    const countdownElement = document.getElementById('next-match-countdown');
+    const nextMatchInfo = document.getElementById('next-match-info');
+
+    // Sadece gelecekteki maçları al
+    const now = new Date();
+    const futureMatches = matches.filter(m => new Date(`${m.match_date}T${m.match_time}`) > now);
+
+    if (!futureMatches || futureMatches.length === 0) {
+        countdownElement.querySelector('h3').textContent = 'Sıradaki Maç';
+        nextMatchInfo.innerHTML = '<p>Yaklaşan maç bulunmamaktadır.</p>';
+        document.getElementById('days').textContent = '00';
+        document.getElementById('hours').textContent = '00';
+        document.getElementById('minutes').textContent = '00';
+        if (timerInterval) clearInterval(timerInterval);
+        return;
+    }
+
+    // En yakın gelecekteki maçı bul
+    futureMatches.sort((a, b) => new Date(`${a.match_date}T${a.match_time}`) - new Date(`${b.match_date}T${b.match_time}`));
+    const nextMatch = futureMatches[0];
+    const matchDate = new Date(`${nextMatch.match_date}T${nextMatch.match_time}`);
+
+    nextMatchInfo.innerHTML = `
+        <p>${nextMatch.title}</p>
+        <p>${matchDate.toLocaleDateString('tr-TR')} - ${nextMatch.match_time.substring(0, 5)}</p>
+    `;
+
+    if (timerInterval) clearInterval(timerInterval);
+
+    function updateTimer() {
+        const now = new Date();
+        const distance = matchDate - now;
+
+        if (distance < 0) {
+            clearInterval(timerInterval);
+            countdownElement.querySelector('h3').textContent = 'Sıradaki Maç';
+            nextMatchInfo.innerHTML = '<p>Maç başladı!</p>';
+            document.getElementById('days').textContent = '00';
+            document.getElementById('hours').textContent = '00';
+            document.getElementById('minutes').textContent = '00';
             return;
         }
 
-        const participantName = prompt("Maça katılmak için adınızı girin:");
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
 
-        if (!participantName || participantName.trim() === '') {
-            alert("Lütfen geçerli bir isim girin.");
-            return;
-        }
+        document.getElementById('days').textContent = String(days).padStart(2, '0');
+        document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+    }
 
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+/**
+ * Adds a participant to a match after validating input and checking availability.
+ * @param {number} matchId - The ID of the match to join.
+ */
+async function addParticipantToMatch(matchId) {
+    const participantName = prompt("Maça katılmak için adınızı girin:");
+
+    if (!participantName || participantName.trim() === '') {
+        alert("Lütfen geçerli bir isim girin.");
+        return;
+    }
+
+    try {
+        // Büyük/küçük harf duyarsız kontrol için ismi küçük harfe çevirip kontrol edelim
         const { data: existingParticipants, error: checkError } = await supabase
             .from('match_participants')
             .select('participant_name')
@@ -151,70 +267,87 @@
             return;
         }
 
+        // Maçın doluluk durumunu kontrol et
+        const { data: currentMatch, error: fetchMatchError } = await supabase
+            .from('matches')
+            .select('current_players, max_players')
+            .eq('id', matchId)
+            .single();
+
+        if (fetchMatchError) throw fetchMatchError;
+
+        const { data: currentParticipants, error: fetchParticipantsError } = await supabase
+            .from('match_participants')
+            .select('id', { count: 'exact' })
+            .eq('match_id', matchId);
+
+        if (fetchParticipantsError) throw fetchParticipantsError;
+
+        const actualParticipantCount = currentParticipants ? currentParticipants.count : 0;
+
+        if (actualParticipantCount >= currentMatch.max_players) {
+            alert('Üzgünüz, bu maç siz katılmaya çalışırken doldu!');
+            fetchMatches();
+            return;
+        }
+
+        // Katılımcıyı ekle
         const { error: participantInsertError } = await supabase
             .from('match_participants')
-            .insert([{ match_id: matchId, participant_name: participantName.trim() }]);
+            .insert([{ 
+                match_id: matchId, 
+                participant_name: participantName.trim() 
+            }]);
 
-        if (participantInsertError) {
-            alert('Katılımcı eklenirken bir hata oluştu.');
-            return;
-        }
+        if (participantInsertError) throw participantInsertError;
 
+        // UI'ı güncelle
         await fetchParticipants(matchId);
         alert(`${participantName.trim()} olarak maça katıldınız!`);
+
+    } catch (error) {
+        console.error('Katılımcı eklenirken hata:', error);
+        alert('Katılımcı eklenirken bir hata oluştu.');
+    }
+}
+
+/**
+ * Removes a participant from a match and updates the UI.
+ * @param {number} participantId - The ID of the participant to remove.
+ * @param {number} matchId - The ID of the match the participant belongs to.
+ */
+async function removeParticipant(participantId, matchId) {
+    if (!confirm('Bu katılımcıyı silmek istediğinizden emin misiniz?')) {
+        return;
     }
 
-    async function fetchParticipants(matchId) {
-        const participantsList = document.getElementById(`participants-${matchId}`);
-        if (!participantsList) return;
-
-        const { data: participants, error } = await supabase
-            .from('match_participants')
-            .select('*')
-            .eq('match_id', matchId)
-            .order('id', { ascending: true });
-
-        if (error) {
-            participantsList.innerHTML = '<li>Katılımcılar yüklenemedi</li>';
-            return;
-        }
-
-        const matchCard = participantsList.closest('.match-card');
-        if (matchCard) {
-            const countElem = matchCard.querySelector('.participant-count');
-            if (countElem) {
-                countElem.textContent = participants ? participants.length : 0;
-            }
-        }
-
-        participantsList.innerHTML = participants && participants.length > 0
-            ? participants.map(p => `
-                <li>
-                    ${p.participant_name}
-                    <button class="delete-participant" data-id="${p.id}">Sil</button>
-                </li>`).join('')
-            : '<li>Henüz katılımcı yok</li>';
-
-        participantsList.querySelectorAll('.delete-participant').forEach(button => {
-            button.onclick = () => removeParticipant(button.dataset.id, matchId);
-        });
-    }
-
-    async function removeParticipant(participantId, matchId) {
-        if (!confirm('Bu katılımcıyı silmek istediğinizden emin misiniz?')) return;
-
+    try {
         const { error } = await supabase
             .from('match_participants')
             .delete()
             .eq('id', participantId);
 
-        if (!error) {
-            await fetchParticipants(matchId);
-            alert('Katılımcı başarıyla silindi!');
-        }
-    }
+        if (error) throw error;
 
-    document.addEventListener('DOMContentLoaded', fetchMatches);
-    </script>
+        // UI'ı güncelle
+        await fetchParticipants(matchId);
+        alert('Katılımcı başarıyla silindi!');
+
+    } catch (error) {
+        console.error('Error removing participant:', error);
+        alert('Katılımcı silinirken bir hata oluştu.');
+    }
+}
+
+// Initialize the page by fetching matches
+document.addEventListener('DOMContentLoaded', fetchMatches);
+</script>
+<a href="create_match.html" class="floating-button" title="Yeni Maç Oluştur">＋</a>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+
 </body>
 </html>
