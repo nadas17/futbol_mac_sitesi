@@ -338,18 +338,7 @@ button[type="submit"]:hover,
     h2 { font-size: 1.25rem; }
     h3 { font-size: 1.1rem; }
 }
-@media (max-width: 480px) {
-  /* .participants-list ul { display: none; }  Katılımcı listesi gizlenmesin */
-
-  .participants-list::after {
-    
-    display: block;
-    text-align: center;
-    margin-top: 10px;
-  }
-}
-
-/* Title Hiyerarşisi */
+/* Removed unnecessary .participants-list::after rule */
 h1, h2, h3 {
     font-family: var(--font-family-primary);
     font-weight: 700;
