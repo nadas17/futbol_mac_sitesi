@@ -15,11 +15,12 @@
     --transition-speed: 0.2s;
     --input-bg: #232323;
     --input-border: #333;
-    --input-focus: ##00cc4e;
+    --input-focus: #00cc4e;
 }
 
 /* Base Styles */
 body {
+    padding-top: 40px;
     font-family: var(--font-family-primary);
     min-height: 100vh;
     margin: 0;
@@ -176,9 +177,10 @@ button[type="submit"]:hover,
 .admin-link:hover,
 .dynamic-button:hover {
     background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
-    transform: scale(1.03);
-    box-shadow: 0 4px 16px 0 #ff3c6f55;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
 }
+/* Removed stray transform and box-shadow properties that were outside of a selector block */
 
 .join-match-btn:disabled,
 .join-match-btn.disabled {
@@ -316,7 +318,7 @@ button[type="submit"]:hover,
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     .layout-container {
         grid-template-columns: 1fr;
     }
@@ -335,4 +337,80 @@ button[type="submit"]:hover,
     h1 { font-size: 1.4rem; }
     h2 { font-size: 1.25rem; }
     h3 { font-size: 1.1rem; }
+}
+@media (max-width: 480px) {
+  .participants-list ul {
+    display: none;
+  }
+
+  .participants-list::after {
+    content: "Katılımcı sayısı: X"; /* JS ile dinamik güncelle */
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+  }
+}
+
+/* Title Hiyerarşisi */
+h1, h2, h3 {
+    font-family: var(--font-family-primary);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #f0f0f0;
+    margin-top: 0;
+    margin-bottom: 0.6em;
+}
+
+h1 {
+    font-size: 2rem;
+    color: #ffffff;
+    border-bottom: 2px solid #00cc4e;
+    padding-bottom: 0.3rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: #dddddd;
+    border-left: 4px solid #00cc4e;
+    padding-left: 10px;
+}
+
+h3 {
+    font-size: 1.25rem;
+    color: #bbbbbb;
+}
+
+/* Paragraflar */
+p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #cccccc;
+    margin-bottom: 1rem;
+}
+/* ===================== */
+/* Floating Action Button */
+/* ===================== */
+
+.floating-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    line-height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    z-index: 1000;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.floating-button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
