@@ -16,6 +16,7 @@
     --input-bg: #232323;
     --input-border: #333;
     --input-focus: #00cc4e;
+    --input-focus-shadow: rgba(0, 204, 78, 0.25); /* Derived from --input-focus */
 }
 
 /* Base Styles */
@@ -140,7 +141,7 @@ input:focus,
 textarea:focus {
     outline: none;
     border-color: var(--input-focus);
-    box-shadow: 0 0 0 2px #ff3c6f44;
+    box-shadow: 0 0 0 2px var(--input-focus-shadow); /* Standardized focus shadow */
     background: #181818;
     color: #fff;
 }
@@ -184,9 +185,21 @@ button[type="submit"]:hover,
 
 .join-match-btn:disabled,
 .join-match-btn.disabled {
-    background: #dc3545;
+    background: #dc3545; /* Keep this red, it's clear for "Match Full" */
+    color: #fff; /* Ensure text is white and legible on red */
     cursor: not-allowed;
-    opacity: 0.85;
+    opacity: 0.75; /* Slightly more faded */
+    /* Override any hover effects specifically for the disabled state */
+    transform: none;
+    box-shadow: none;
+}
+
+/* Explicitly remove hover effects for disabled state if there are general hover rules */
+.join-match-btn:disabled:hover,
+.join-match-btn.disabled:hover {
+    background: #dc3545; /* Maintain the disabled background color on hover */
+    transform: none; /* No scale effect */
+    box-shadow: none; /* No shadow effect */
 }
 
 /* Create New Match butonu için özel stil */
@@ -206,13 +219,14 @@ button[type="submit"]:hover,
 .delete-participant {
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Cross symbol size */
     cursor: pointer;
-    opacity: 0;
+    opacity: 0.4; /* Subtly visible by default */
     transition: opacity 0.3s ease, color 0.3s ease;
-    color: white;
-    padding: 0;
+    color: #ccc; /* Default color slightly muted */
+    padding: 0 5px; /* Easier click target */
     margin: 0;
+    line-height: 1; /* Align cross better if font size causes height issues */
 }
 
 .delete-participant::before {
@@ -224,7 +238,8 @@ button[type="submit"]:hover,
 }
 
 .delete-participant:hover {
-    color: red;
+    color: #ff4d4d; /* Brighter red on hover */
+    opacity: 1; /* Fully visible on hover */
 }
 
 /* Messages */
@@ -271,16 +286,21 @@ button[type="submit"]:hover,
 }
 
 .participants-list li {
-    background: rgba(207, 188, 188, 0.5);
-    padding: 6px 12px;
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03); /* More subtle background for dark theme */
+    padding: 8px 12px; /* Slightly more vertical padding */
+    border-radius: 4px; /* Slightly less pronounced radius */
     font-size: 0.95rem;
-    color: #ddd;
-    margin-bottom: 6px;
+    color: #ccc; /* Slightly adjusted for new background if needed */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border: 1px solid #00cc4e; /* Her satıra border */
+    border: none; /* Remove the full green border */
+    border-bottom: 1px solid #333; /* Subtle separator line */
+    /* margin-bottom is removed as border-bottom will handle separation */
+}
+
+.participants-list li:last-child {
+    border-bottom: none; /* No border for the last item */
 }
 
 /* Countdown Timer */
@@ -372,7 +392,17 @@ h2 {
 
 h3 {
     font-size: 1.25rem;
-    color: #bbbbbb;
+    color: #bbbbbb; /* Default for h3 */
+}
+
+/* Style for h3 elements specifically within .match-card */
+.match-card h3 {
+    color: #f0f0f0; /* Brighter color for better prominence */
+    font-size: 1.3rem; /* Slightly larger font size */
+    margin-bottom: 0.5em; /* Adjust spacing if needed */
+    padding-bottom: 0.4em; /* Add padding for the border */
+    border-bottom: 1px solid #444; /* Subtle separator line */
+    /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); Optional: if background is very noisy */
 }
 
 /* Paragraflar */
@@ -408,4 +438,62 @@ p {
 .floating-button:hover {
     transform: scale(1.08);
     box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+/* Inline Join Form Styles */
+.inline-join-form-container {
+    display: flex;
+    gap: 10px; /* Spacing between elements */
+    margin-top: 10px; /* Spacing from the match card content */
+    align-items: center;
+}
+
+.inline-join-input {
+    flex-grow: 1; /* Input field takes available space */
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    border: 1.2px solid var(--input-border);
+    border-radius: 7px;
+    background: var(--input-bg);
+    color: #f5f5f5;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.inline-join-input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 2px var(--input-focus-shadow); /* Standardized focus shadow */
+    background: #181818; /* Darker background on focus */
+    color: #fff;
+}
+
+.inline-confirm-button,
+.inline-cancel-button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+
+.inline-confirm-button {
+    background-color: var(--primary-color); /* Greenish, aligns with primary action */
+    color: #fff;
+}
+
+.inline-confirm-button:hover {
+    background-color: var(--primary-hover); /* Darker green on hover */
+    transform: scale(1.03);
+}
+
+.inline-cancel-button {
+    background-color: #6c757d; /* Neutral/grey for cancel */
+    color: #fff;
+}
+
+.inline-cancel-button:hover {
+    background-color: #5a6268; /* Darker grey on hover */
+    transform: scale(1.03);
 }
