@@ -488,12 +488,106 @@ p {
     transform: scale(1.03);
 }
 
-.inline-cancel-button {
-    background-color: #6c757d; /* Neutral/grey for cancel */
-    color: #fff;
+/* Progress Indicator Styles */
+#progress-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 25px; /* Space before the first step */
+    padding: 10px 0;
 }
 
-.inline-cancel-button:hover {
-    background-color: #5a6268; /* Darker grey on hover */
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #666; /* Inactive dot color */
+    margin: 0 6px; /* Spacing between dots */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.progress-dot.active {
+    background-color: var(--primary-color); /* Active dot color (theme green) */
+    transform: scale(1.3); /* Make active dot slightly larger */
+}
+
+
+/* Multi-step Form Styles */
+.form-step {
+    display: none; /* Hidden by default, JS toggles .active */
+    background: rgba(30, 30, 30, 0.5); /* Dark, slightly transparent background */
+    backdrop-filter: blur(4px); /* Optional blur effect */
+    padding: 25px;
+    border-radius: var(--border-radius); /* Use theme variable */
+    border: 1px solid #2a2a2a; /* Subtle border */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    margin-bottom: 20px; /* Space before navigation buttons */
+    width: 100%; /* Ensure step takes full width of form container */
+}
+
+.form-step.active {
+    display: block; /* Show active step */
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    width: 100%; /* Ensure navigation buttons also align with centered inputs */
+    max-width: 260px; /* Match input max-width for alignment */
+    margin-left: auto; /* Center the navigation block */
+    margin-right: auto;
+}
+
+.form-navigation button {
+    color: #fff;
+    padding: 10px 0; /* Consistent with main buttons */
+    border: none;
+    border-radius: 7px; /* Consistent with main buttons */
+    font-size: 1rem;    /* Consistent with main buttons */
+    /* width: 100%; /* This will be handled by flex-grow */
+    /* max-width: 260px; /* This is on the container */
+    cursor: pointer;
+    font-weight: 600;   /* Consistent with main buttons */
+    letter-spacing: 0.04em; /* Consistent with main buttons */
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s; /* Consistent */
+    flex-grow: 1;
+    text-align: center;
+}
+
+.form-navigation button#prev-btn {
+    background: #4a4a4a; /* Darker grey for secondary action */
+    color: #ccc;
+    margin-right: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.form-navigation button#prev-btn:hover {
+    background: #5a5a5a;
+    color: #fff;
     transform: scale(1.03);
+    box-shadow: 0 3px 9px rgba(0,0,0,0.3);
+}
+
+.form-navigation button#next-btn {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    box-shadow: 0 2px 8px 0 rgba(0, 204, 78, 0.3); /* Adjusted shadow to match theme */
+}
+
+.form-navigation button#next-btn:hover {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.05); /* Consistent with main buttons */
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5); /* Consistent with main buttons */
+}
+
+/* If only one button is visible (e.g., only Next on first step, or only Prev on last before submit) */
+/* .form-navigation button:only-child { */
+    /* margin-right: 0; */ /* flex-grow handles distribution */
+/* } */
+
+/* Ensure the main submit button within the last step maintains its original styling */
+.form-step button[type="submit"] {
+    /* It should inherit global button[type="submit"] styles */
+    /* If specific overrides are needed, they would go here, but likely not necessary */
+    margin-top: 15px; /* Add some space if it's the last element in the step */
 }

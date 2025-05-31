@@ -12,29 +12,48 @@
 
     <div class="container">
         <h1>Create New Match</h1>
+        <div id="progress-indicator"></div> <!-- Progress indicator placeholder -->
         <form id="create-match-form">
-            <label for="title">Match Title:</label>
-            <input type="text" id="title" name="title" required>
+            <div class="form-step">
+                <label for="title">Match Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
 
-            <label for="match_date">Date:</label>
-            <input type="date" id="match_date" name="match_date" required>
+            <div class="form-step">
+                <label for="match_date">Date:</label>
+                <input type="date" id="match_date" name="match_date" required>
+            </div>
 
-            <label for="match_time">Time:</label>
-            <input type="time" id="match_time" name="match_time" required>
+            <div class="form-step">
+                <label for="match_time">Time:</label>
+                <input type="time" id="match_time" name="match_time" required>
+            </div>
 
-            <label for="location">Location:</label>
-            <input type="text" id="location" name="location" required>
+            <div class="form-step">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" required>
+            </div>
 
-            <label for="max_players">Maximum Number of Players:</label>
-            <input type="number" id="max_players" name="max_players" min="1" required>
+            <div class="form-step">
+                <label for="max_players">Maximum Number of Players:</label>
+                <input type="number" id="max_players" name="max_players" min="1" required>
+            </div>
 
-            <label for="price_per_player">Price (PLN/player, optional):</label>
-            <input type="number" id="price_per_player" name="price_per_player" min="0" step="0.01">
+            <div class="form-step">
+                <label for="price_per_player">Price (PLN/player, optional):</label>
+                <input type="number" id="price_per_player" name="price_per_player" min="0" step="0.01">
+            </div>
 
-            <label for="description">Description (optional):</label>
-            <textarea id="description" name="description"></textarea>
+            <div class="form-step">
+                <label for="description">Description (optional):</label>
+                <textarea id="description" name="description"></textarea>
+                <button type="submit">Create Match</button> <!-- Submit button in the last step -->
+            </div>
 
-            <button type="submit">Create Match</button>
+            <div class="form-navigation">
+                <button type="button" id="prev-btn" style="display:none;">Previous</button>
+                <button type="button" id="next-btn">Next</button>
+            </div>
             <div id="form-message" class="message" style="display: none;"></div>
         </form>
     </div>
@@ -50,7 +69,90 @@
         const form = document.getElementById('create-match-form');
         const messageDiv = document.getElementById('form-message');
 
+        // Multi-step form logic
+        const formSteps = document.querySelectorAll('.form-step');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const submitBtn = form.querySelector('button[type="submit"]'); // Actual submit button inside the last step
+        const progressIndicator = document.getElementById('progress-indicator');
+        let currentStep = 0;
+
+        function showStep(stepIndex) {
+            formSteps.forEach((step, index) => {
+                step.classList.toggle('active', index === stepIndex);
+            });
+
+            prevBtn.style.display = stepIndex === 0 ? 'none' : 'inline-block';
+            nextBtn.style.display = stepIndex === formSteps.length - 1 ? 'none' : 'inline-block';
+            submitBtn.style.display = stepIndex === formSteps.length - 1 ? 'inline-block' : 'none';
+
+            updateProgressIndicator();
+            // Clear previous messages when changing step
+            messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+        }
+
+        function updateProgressIndicator() {
+            progressIndicator.innerHTML = ''; // Clear previous dots
+            formSteps.forEach((step, index) => {
+                const dot = document.createElement('span');
+                dot.classList.add('progress-dot'); // CSS for this will be added later
+                if (index === currentStep) {
+                    dot.classList.add('active'); // CSS for this will be added later
+                }
+                // Optional: Allow clicking dots to navigate if steps are valid
+                // dot.addEventListener('click', () => {
+                //     if (validateStep(index)) { currentStep = index; showStep(currentStep); }
+                // });
+                progressIndicator.appendChild(dot);
+            });
+        }
+
+        function validateStep(stepIndex) {
+            const currentStepFields = formSteps[stepIndex].querySelectorAll('input[required], textarea[required]');
+            for (const field of currentStepFields) {
+                if (!field.value.trim()) {
+                    showMessage(`Please fill in the ${field.previousElementSibling.textContent.replace(':', '')} field.`, 'error');
+                    field.focus();
+                    return false;
+                }
+                // Basic number validation for min attribute
+                if (field.type === "number" && field.min && parseFloat(field.value) < parseFloat(field.min)) {
+                     showMessage(`${field.previousElementSibling.textContent.replace(':', '')} must be at least ${field.min}.`, 'error');
+                     field.focus();
+                     return false;
+                }
+            }
+            showMessage('', 'success'); // Clear message on successful validation of step
+            messageDiv.style.display = 'none';
+            return true;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (validateStep(currentStep)) {
+                if (currentStep < formSteps.length - 1) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        });
+
+        // Initial setup
+        showStep(currentStep); // Show the first step and initialize buttons/progress
+
         form.addEventListener('submit', async (event) => {
+            // Validate the final step before submitting, in case the user didn't click "Next"
+            if (!validateStep(currentStep)) {
+                 event.preventDefault(); // Stop submission if current (last) step is invalid
+                 return;
+            }
             event.preventDefault(); 
 
             const submitButton = form.querySelector('button[type="submit"]');
