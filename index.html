@@ -104,10 +104,60 @@
             `;
             matchesContainer.appendChild(matchElement);
 
-            matchElement.querySelector('.join-match-btn').onclick = () => addParticipantToMatch(match.id);
+            // Store button a variable to be able to hide/show it
+            const joinButton = matchElement.querySelector('.join-match-btn');
+            joinButton.onclick = () => showJoinMatchForm(match.id, joinButton);
             fetchParticipants(match.id);
         }
         updateCountdown(matches);
+    }
+
+    /**
+     * Shows an inline form for joining a match.
+     * @param {number} matchId - The ID of the match to join.
+     * @param {HTMLElement} buttonElement - The "Join Match" button element.
+     */
+    function showJoinMatchForm(matchId, buttonElement) {
+        // Hide the original "Join Match" button
+        buttonElement.style.display = 'none';
+
+        // Create a container for the inline form
+        const formContainer = document.createElement('div');
+        formContainer.className = 'inline-join-form-container';
+
+        // Create input field
+        const inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.placeholder = 'Enter your name';
+        inputField.className = 'inline-join-input';
+        formContainer.appendChild(inputField);
+
+        // Create "Confirm Join" button
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = 'Confirm Join';
+        confirmButton.className = 'inline-confirm-button';
+        confirmButton.onclick = () => {
+            const participantName = inputField.value;
+            addParticipantToMatch(matchId, participantName);
+            // Remove the form and show the original button
+            formContainer.remove();
+            buttonElement.style.display = ''; // Show the original button
+        };
+        formContainer.appendChild(confirmButton);
+
+        // Create "Cancel" button
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.className = 'inline-cancel-button'; // Add a class for styling
+        cancelButton.onclick = () => {
+            // Remove the form and show the original button
+            formContainer.remove();
+            buttonElement.style.display = ''; // Show the original button
+        };
+        formContainer.appendChild(cancelButton);
+
+        // Insert the form container after the hidden button
+        buttonElement.parentNode.insertBefore(formContainer, buttonElement.nextSibling);
     }
 
     /**
@@ -237,10 +287,9 @@
     /**
      * Adds a participant to a match after validating input and checking availability.
      * @param {number} matchId - The ID of the match to join.
+     * @param {string} participantName - The name of the participant.
      */
-    async function addParticipantToMatch(matchId) {
-        const participantName = prompt("Enter your name to join the match:");
-
+    async function addParticipantToMatch(matchId, participantName) {
         if (!participantName || participantName.trim() === '') {
             alert("Please enter a valid name.");
             return;
