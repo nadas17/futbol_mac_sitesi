@@ -88,6 +88,7 @@
                 <p><strong>Date:</strong> ${new Date(match.match_date).toLocaleDateString('en-GB')}</p>
                 <p><strong>Time:</strong> ${match.match_time.substring(0, 5)}</p>
                 <p><strong>Location:</strong> ${match.location}</p>
+                <p><strong>Description:</strong> ${match.description || ''}</p>
                 <div class="participants-list">
                     <div style="margin-bottom:8px;">
                         <strong>Participants/Quota:</strong>
@@ -101,13 +102,75 @@
                         ${match.current_players >= match.max_players ? 'disabled' : ''}>
                     ${match.current_players >= match.max_players ? 'Match Full' : 'Join Match'}
                 </button>
+                <div class="discussion-panel">
+                    <div class="discussion-title">${match.title} - Discussion</div>
+                    <label class="comment-image-label">
+                        <span class="attach-icon">📎</span>
+                        <input type="file" accept="image/*" class="comment-image" style="display:none;" />
+                    </label>
+                    <input type="text" placeholder="Your name" class="comment-username" />
+                    <textarea placeholder="Write a comment..." class="comment-text"></textarea>
+                    <button class="comment-submit-btn">Send</button>
+                    <ul class="comment-list"></ul>
+                </div>
             `;
             matchesContainer.appendChild(matchElement);
 
-            matchElement.querySelector('.join-match-btn').onclick = () => addParticipantToMatch(match.id);
+            // Store button a variable to be able to hide/show it
+            const joinButton = matchElement.querySelector('.join-match-btn');
+            joinButton.onclick = () => showJoinMatchForm(match.id, joinButton);
             fetchParticipants(match.id);
+            setupDiscussionPanel(matchElement, match.id);
         }
         updateCountdown(matches);
+    }
+
+    /**
+     * Shows an inline form for joining a match.
+     * @param {number} matchId - The ID of the match to join.
+     * @param {HTMLElement} buttonElement - The "Join Match" button element.
+     */
+    function showJoinMatchForm(matchId, buttonElement) {
+        // Hide the original "Join Match" button
+        buttonElement.style.display = 'none';
+
+        // Create a container for the inline form
+        const formContainer = document.createElement('div');
+        formContainer.className = 'inline-join-form-container';
+
+        // Create input field
+        const inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.placeholder = 'Enter your name';
+        inputField.className = 'inline-join-input';
+        formContainer.appendChild(inputField);
+
+        // Create "Confirm Join" button
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = 'Confirm Join';
+        confirmButton.className = 'inline-confirm-button';
+        confirmButton.onclick = () => {
+            const participantName = inputField.value;
+            addParticipantToMatch(matchId, participantName);
+            // Remove the form and show the original button
+            formContainer.remove();
+            buttonElement.style.display = ''; // Show the original button
+        };
+        formContainer.appendChild(confirmButton);
+
+        // Create "Cancel" button
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.className = 'inline-cancel-button'; // Add a class for styling
+        cancelButton.onclick = () => {
+            // Remove the form and show the original button
+            formContainer.remove();
+            buttonElement.style.display = ''; // Show the original button
+        };
+        formContainer.appendChild(cancelButton);
+
+        // Insert the form container after the hidden button
+        buttonElement.parentNode.insertBefore(formContainer, buttonElement.nextSibling);
     }
 
     /**
@@ -237,10 +300,9 @@
     /**
      * Adds a participant to a match after validating input and checking availability.
      * @param {number} matchId - The ID of the match to join.
+     * @param {string} participantName - The name of the participant.
      */
-    async function addParticipantToMatch(matchId) {
-        const participantName = prompt("Enter your name to join the match:");
-
+    async function addParticipantToMatch(matchId, participantName) {
         if (!participantName || participantName.trim() === '') {
             alert("Please enter a valid name.");
             return;
@@ -336,6 +398,177 @@
 
     // Initialize the page by fetching matches
     document.addEventListener('DOMContentLoaded', fetchMatches);
+    // Storage için klasör adı
+const COMMENTS_IMAGES_FOLDER = 'match-comments-images';
+
+// Yorumları çek ve listele
+const commentsCache = new Map();
+
+async function fetchComments(matchId, container) {
+  const listEl = container.querySelector('.comment-list');
+  listEl.innerHTML = 'Loading comments...';
+
+  // Check cache first
+  if (commentsCache.has(matchId)) {
+    const cachedComments = commentsCache.get(matchId);
+    listEl.innerHTML = cachedComments.length
+      ? cachedComments.map(c => `
+        <li>
+          <strong>${c.username || 'Anonymous'}</strong>: ${c.comment}
+          ${c.image_url ? `<img src="${c.image_url}" alt="comment image" />` : ''}
+        </li>
+      `).join('')
+      : '<li>No comments yet</li>';
+    return;
+  }
+
+  let { data: comments, error } = await supabase
+    .from('match_comments')
+    .select('*')
+    .eq('match_id', matchId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching comments:', error);
+    listEl.innerHTML = '<li>Unable to load comments due to a network issue or invalid match ID. Please try again later.</li>';
+    return;
+  }
+
+  // Cache the comments
+  commentsCache.set(matchId, comments);
+
+  listEl.innerHTML = comments.length
+    ? comments.map(c => `
+      <li>
+        <strong>${c.username || 'Anonymous'}</strong>: ${c.comment}
+        ${c.image_url ? `<img src="${c.image_url}" alt="comment image" />` : ''}
+      </li>
+    `).join('')
+    : '<li>No comments yet</li>';
+}
+
+// Yorum gönderme işlemi
+async function submitComment(matchId, container) {
+  const usernameInput = container.querySelector('.comment-username');
+  const commentInput = container.querySelector('.comment-text');
+  const imageInput = container.querySelector('.comment-image');
+  
+  const username = usernameInput.value.trim();
+  const comment = commentInput.value.trim();
+  const file = imageInput.files[0];
+
+  // Add name validation
+  if (!username) {
+    alert('Please enter your name.');
+    usernameInput.focus();
+    return;
+  }
+
+  if (!comment) {
+    alert('Please enter a comment.');
+    commentInput.focus();
+    return;
+  }
+
+  let imageUrl = null;
+
+  if (file) {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${matchId}/${Date.now()}.${fileExt}`;
+      
+      const sendBtn = container.querySelector('.comment-submit-btn');
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Uploading...';
+      sendBtn.classList.add('uploading');
+      
+      // Upload file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('match-comments-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('match-comments-images')
+        .getPublicUrl(fileName);
+
+      if (!urlData?.publicUrl) {
+        throw new Error('Failed to get public URL');
+      }
+
+      imageUrl = urlData.publicUrl;
+      
+      // Show success state
+      sendBtn.textContent = '✔ Uploaded!';
+      sendBtn.classList.add('upload-success');
+      
+    } catch (error) {
+      alert(`Image upload failed: ${error.message}`);
+      console.error('Upload error details:', error);
+      return;
+    } finally {
+      const sendBtn = container.querySelector('.comment-submit-btn');
+      sendBtn.disabled = false;
+      setTimeout(() => {
+        sendBtn.textContent = 'Send';
+        sendBtn.classList.remove('uploading', 'upload-success');
+      }, 1200);
+    }
+  }
+  
+  // Validate match_id before saving the comment
+  const { data: matchExists, error: matchError } = await supabase
+    .from('matches')
+    .select('id')
+    .eq('id', matchId)
+    .single();
+
+  if (matchError || !matchExists) {
+    alert('Invalid match ID. Please try again.');
+    return;
+  }
+
+  // Yorum kaydet
+  const { error: insertError } = await supabase
+    .from('match_comments')
+    .insert([{
+      match_id: matchId,
+      username: username || null,
+      comment,
+      image_url: imageUrl,
+    }]);
+
+  if (insertError) {
+    alert('Failed to save comment: ' + insertError.message);
+    return;
+  }
+
+  // Alanları temizle
+  usernameInput.value = '';
+  commentInput.value = '';
+  imageInput.value = '';
+
+  // Yorumları yeniden yükle
+  await fetchComments(matchId, container);
+}
+
+// Maç kartı yüklendiğinde event listener ekle
+function setupDiscussionPanel(matchElement, matchId) {
+  const container = matchElement.querySelector('.discussion-panel');
+  const sendBtn = container.querySelector('.comment-submit-btn');
+  sendBtn.onclick = () => submitComment(matchId, container);
+  fetchComments(matchId, container);
+}
+    
     </script>
     <a href="create_match.html" class="floating-button" title="Create New Match">＋</a>
 

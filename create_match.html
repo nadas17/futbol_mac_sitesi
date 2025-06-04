@@ -6,58 +6,249 @@
     <title>Create New Match</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Supabase operations should be handled server-side for security -->
 </head>
 <body>
 
     <div class="container">
         <h1>Create New Match</h1>
+        <div id="progress-indicator"></div> <!-- Progress indicator placeholder -->
         <form id="create-match-form">
-            <label for="title">Match Title:</label>
-            <input type="text" id="title" name="title" required>
+            <div class="form-step">
+                <label for="title">Match Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
 
-            <label for="match_date">Date:</label>
-            <input type="date" id="match_date" name="match_date" required>
+            <div class="form-step">
+                <label for="match_date">Date:</label>
+                <input type="date" id="match_date" name="match_date" required>
+            </div>
 
-            <label for="match_time">Time:</label>
-            <input type="time" id="match_time" name="match_time" required>
+            <div class="form-step">
+                <label for="match_time">Time:</label>
+                <input type="time" id="match_time" name="match_time" required>
+            </div>
 
-            <label for="location">Location:</label>
-            <input type="text" id="location" name="location" required>
+            <div class="form-step">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" required>
+            </div>
 
-            <label for="max_players">Maximum Number of Players:</label>
-            <input type="number" id="max_players" name="max_players" min="1" required>
+            <div class="form-step">
+                <label for="max_players">Maximum Number of Players:</label>
+                <input type="number" id="max_players" name="max_players" min="1" required>
+            </div>
 
-            <label for="price_per_player">Price (PLN/player, optional):</label>
-            <input type="number" id="price_per_player" name="price_per_player" min="0" step="0.01">
+            <div class="form-step">
+                <label for="price_per_player">Price (PLN/player, optional - leave empty for no price):</label>
+                <input type="number" id="price_per_player" name="price_per_player" min="0" step="0.01" placeholder="Enter price or leave empty">
+            </div>
 
-            <label for="description">Description (optional):</label>
-            <textarea id="description" name="description"></textarea>
+            <div class="form-step">
+                <label for="description">Description (optional):</label>
+                <textarea id="description" name="description"></textarea>
+                <button type="submit">Create Match</button> <!-- Submit button in the last step -->
+            </div>
 
-            <button type="submit">Create Match</button>
             <div id="form-message" class="message" style="display: none;"></div>
         </form>
     </div>
 
     <script>
-        // Replace these with your actual Supabase credentials
-        const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxbXRyemd2dHZseG9iZXl1cXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzQ1MDUsImV4cCI6MjA2Mzc1MDUwNX0.FoB2vZZWMmR2o5-imFN1ijAdRxTr-R1ykXwOtYNCD3I';
-
-        // Initialize the Supabase client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Supabase operations should be handled server-side for security.
 
         const form = document.getElementById('create-match-form');
         const messageDiv = document.getElementById('form-message');
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault(); 
+        // Multi-step form logic
+        const formSteps = document.querySelectorAll('.form-step');
+        const submitBtn = form.querySelector('button[type="submit"]'); 
+        const progressIndicator = document.getElementById('progress-indicator');
+        let currentStep = 0;
 
+        function showStep(stepIndex) {
+            formSteps.forEach((step, index) => {
+                step.classList.toggle('active', index === stepIndex);
+            });
+
+            submitBtn.style.display = stepIndex === formSteps.length - 1 ? 'inline-block' : 'none';
+            
+            updateProgressIndicator();
+            messageDiv.style.display = 'none'; 
+            messageDiv.textContent = '';
+
+            if (formSteps[stepIndex] && formSteps[stepIndex].classList.contains('active')) {
+                const firstInput = formSteps[stepIndex].querySelector('input:not([type="hidden"]), textarea');
+                if (firstInput) {
+                    // Short delay to ensure the element is fully visible and focusable after display:block
+                    setTimeout(() => firstInput.focus(), 50); 
+                }
+            }
+        }
+        
+        function autoAdvance() {
+            if (currentStep < formSteps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+
+        function updateProgressIndicator() {
+            const dots = progressIndicator.querySelectorAll('.progress-dot');
+            formSteps.forEach((step, index) => {
+                let dot;
+                if (dots[index]) {
+                    dot = dots[index];
+                } else {
+                    dot = document.createElement('span');
+                    dot.classList.add('progress-dot');
+                    progressIndicator.appendChild(dot);
+                    dot.addEventListener('click', () => {
+                        if (index < currentStep) { // Allow navigation to previous, validated steps
+                            currentStep = index;
+                            showStep(currentStep);
+                        } else if (index > currentStep) { // Navigate to future step if current is valid
+                            let canProceed = true;
+                            for (let i = currentStep; i < index; i++) {
+                                if (!validateStep(i)) {
+                                    canProceed = false;
+                                    showStep(currentStep); // Stay on current step if intermediate is invalid
+                                    break;
+                                }
+                            }
+                            if (canProceed) {
+                                currentStep = index;
+                                showStep(currentStep);
+                            }
+                        }
+                    });
+                }
+                dot.classList.toggle('active', index === currentStep);
+            });
+        }
+
+        function validateStep(stepIndex) {
+            // Ensure stepIndex is valid
+            if (stepIndex < 0 || stepIndex >= formSteps.length) {
+                const currentStepElement = formSteps[stepIndex];
+                if (!currentStepElement) return false;
+    
+                const fieldsToValidate = currentStepElement.querySelectorAll('input, textarea');
+                let stepIsValid = true;
+    
+                for (const field of fieldsToValidate) {
+                    if (!validateField(field)) {
+                        stepIsValid = false;
+                    }
+                }
+    
+                if (!stepIsValid) {
+                    showMessage('Please correct the highlighted errors.', 'error');
+                } else {
+                    clearGlobalMessage();
+                }
+                return stepIsValid;
+    
+            function validateField(field) {
+                clearFieldErrors(field);
+    
+                let errorMessage = '';
+                const labelText = field.previousElementSibling ? field.previousElementSibling.textContent.replace(':', '') : field.name;
+    
+                if (field.required && !field.value.trim()) {
+                    errorMessage = `${labelText} is required.`;
+                } else if (field.type === "number" && field.hasAttribute('min') && field.value !== '') {
+                    if (parseFloat(field.value) < parseFloat(field.min)) {
+                        errorMessage = `${labelText} must be at least ${field.min}.`;
+                    }
+                }
+    
+                if (errorMessage) {
+                    showFieldError(field, errorMessage);
+                    return false;
+                }
+                return true;
+            }
+    
+            function clearFieldErrors(field) {
+                field.classList.remove('invalid');
+                const existingErrorSpan = field.parentNode.querySelector(`.error-message-inline[data-for="${field.id}"]`);
+                if (existingErrorSpan) {
+                    existingErrorSpan.remove();
+                }
+            }
+    
+            function showFieldError(field, errorMessage) {
+                field.classList.add('invalid');
+                const errorSpan = document.createElement('span');
+                errorSpan.className = 'error-message-inline';
+                errorSpan.setAttribute('data-for', field.id);
+                errorSpan.textContent = errorMessage;
+                field.parentNode.insertBefore(errorSpan, field.nextSibling);
+            }
+    
+            function clearGlobalMessage() {
+                messageDiv.style.display = 'none';
+                messageDiv.textContent = '';
+            }
+            }
+            return stepIsValid;
+        }
+
+        formSteps.forEach((step, index) => {
+            const inputs = step.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                let eventType = 'blur';
+                if (input.type === 'date' || input.type === 'time') {
+                    eventType = 'change'; // 'change' might be better for date/time pickers
+                }
+
+                input.addEventListener(eventType, () => {
+                    // Only try to advance if the current step (the one containing the input) is valid
+                    if (validateStep(index) && index === currentStep) { 
+                        // For optional fields, blurring without content should still allow advance
+                        // if all *required* fields in this step are fine.
+                        // The current validateStep checks required fields first.
+                        // If an optional field is the one blurred, and it's valid (or empty and valid),
+                        // and all other required fields in this step are also valid, then advance.
+                        
+                        // Check if this is the last input in the current step before auto-advancing,
+                        // or if all required fields in the current step are now valid.
+                        // For simplicity here: if the step validates, and it's not the description field (which has the submit button)
+                        // or if it's an optional field that isn't blocking, try to advance.
+                        
+                        // If it's an optional field and empty, it won't fail validation.
+                        // If it's a required field and filled and valid, it won't fail.
+                        // So, if validateStep passes, we are good to try advancing.
+                        if (index < formSteps.length -1) { // Don't auto-advance from the last step
+                           autoAdvance();
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Initial setup
+        showStep(currentStep); 
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.textContent;
+
             submitButton.disabled = true;
             submitButton.textContent = 'Creating...';
 
+            // Validate all steps before proceeding (optional: implement if needed)
+            // for (let i = 0; i < formSteps.length; i++) {
+            //     if (!validateStep(i)) {
+            //         submitButton.disabled = false;
+            //         submitButton.textContent = originalButtonText;
+            //         return;
+            //     }
+            // }
+
+            // Collect form data
             const title = document.getElementById('title').value;
             const match_date = document.getElementById('match_date').value;
             const match_time = document.getElementById('match_time').value;
@@ -67,40 +258,54 @@
             const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
             const description = document.getElementById('description').value || null;
 
-            const { data, error } = await supabase
-                .from('matches')
-                .insert([
-                    {
-                        title,
-                        match_date,
-                        match_time,
-                        location,
-                        max_players,
-                        price_per_player,
-                        description,
-                        current_players: 0
+            // Example: send data to your server (replace URL and logic as needed)
+            let retries = 3;
+            let result = null;
+            let error = null;
+            while (retries > 0) {
+                try {
+                    // Replace the URL and method as needed for your backend
+                    const response = await fetch('/api/create-match', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title,
+                            match_date,
+                            match_time,
+                            location,
+                            max_players,
+                            price_per_player,
+                            description
+                        })
+                    });
+                    result = await response.json();
+                    if (response.ok) {
+                        showMessage('Match created successfully!', 'success');
+                        form.reset();
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                        break;
+                    } else {
+                        showMessage('Failed to create match: ' + (result.error || 'Unknown error'), 'error');
+                        break;
                     }
-                ]);
+                } catch (err) {
+                    retries--;
+                    error = err;
+                    if (retries === 0) {
+                        showMessage('Network error: Unable to create match after multiple attempts.', 'error');
+                    }
+                }
+            }
 
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
-
-            if (error) {
-                showMessage('Failed to create match: ' + error.message, 'error');
-            } else {
-                showMessage('Match created successfully!', 'success');
-                form.reset();
-
-                // Redirect to the index page after a short delay
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000); // Redirect after 2 seconds
-            }
         });
 
         function showMessage(msg, type) {
             messageDiv.textContent = msg;
-            messageDiv.className = `message ${type}`;
+            messageDiv.className = `message ${type} visible`;
             messageDiv.style.display = 'block';
         }
     </script>

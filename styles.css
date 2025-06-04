@@ -16,6 +16,7 @@
     --input-bg: #232323;
     --input-border: #333;
     --input-focus: #00cc4e;
+    --input-focus-shadow: rgba(0, 204, 78, 0.25); /* Derived from --input-focus */
 }
 
 /* Base Styles */
@@ -140,7 +141,7 @@ input:focus,
 textarea:focus {
     outline: none;
     border-color: var(--input-focus);
-    box-shadow: 0 0 0 2px #ff3c6f44;
+    box-shadow: 0 0 0 2px var(--input-focus-shadow); /* Standardized focus shadow */
     background: #181818;
     color: #fff;
 }
@@ -184,9 +185,21 @@ button[type="submit"]:hover,
 
 .join-match-btn:disabled,
 .join-match-btn.disabled {
-    background: #dc3545;
+    background: #dc3545; /* Keep this red, it's clear for "Match Full" */
+    color: #fff; /* Ensure text is white and legible on red */
     cursor: not-allowed;
-    opacity: 0.85;
+    opacity: 0.75; /* Slightly more faded */
+    /* Override any hover effects specifically for the disabled state */
+    transform: none; 
+    box-shadow: none;
+}
+
+/* Explicitly remove hover effects for disabled state if there are general hover rules */
+.join-match-btn:disabled:hover,
+.join-match-btn.disabled:hover {
+    background: #dc3545; /* Maintain the disabled background color on hover */
+    transform: none; /* No scale effect */
+    box-shadow: none; /* No shadow effect */
 }
 
 /* Create New Match butonu için özel stil */
@@ -203,16 +216,19 @@ button[type="submit"]:hover,
 }
 
 /* Delete Button */
+/* Hide delete button by default, show on li hover */
 .delete-participant {
+    display: none;
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Cross symbol size */
     cursor: pointer;
-    opacity: 0;
+    opacity: 0.4; /* Subtly visible by default */
     transition: opacity 0.3s ease, color 0.3s ease;
-    color: white;
-    padding: 0;
+    color: #ccc; /* Default color slightly muted */
+    padding: 0 5px; /* Easier click target */
     margin: 0;
+    line-height: 1; /* Align cross better if font size causes height issues */
 }
 
 .delete-participant::before {
@@ -220,11 +236,13 @@ button[type="submit"]:hover,
 }
 
 .participants-list li:hover .delete-participant {
+    display: inline;
     opacity: 1;
 }
 
 .delete-participant:hover {
-    color: red;
+    color: #ff4d4d; /* Brighter red on hover */
+    opacity: 1; /* Fully visible on hover */
 }
 
 /* Messages */
@@ -271,16 +289,26 @@ button[type="submit"]:hover,
 }
 
 .participants-list li {
-    background: rgba(207, 188, 188, 0.5);
-    padding: 6px 12px;
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03); /* More subtle background for dark theme */
+    padding: 8px 12px; /* Slightly more vertical padding */
+    border-radius: 4px; /* Slightly less pronounced radius */
     font-size: 0.95rem;
-    color: #ddd;
-    margin-bottom: 6px;
+    color: #ccc; /* Slightly adjusted for new background if needed */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border: 1px solid #00cc4e; /* Her satıra border */
+    border: none; /* Remove the full green border */
+    border-bottom: 1px solid #333; /* Subtle separator line */
+    /* margin-bottom is removed as border-bottom will handle separation */
+}
+
+.participants-list li:last-child {
+    border-bottom: none; /* No border for the last item */
+}
+
+/* Make participant name turn green on hover */
+.participants-list li:hover {
+    color: var(--primary-color);
 }
 
 /* Countdown Timer */
@@ -317,6 +345,77 @@ button[type="submit"]:hover,
     margin-top: 5px;
 }
 
+/* Discussion Panel Styles */
+.discussion-panel {
+  margin-top: 15px;
+  background: rgba(30, 30, 30, 0.5);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.discussion-panel input[type="text"],
+.discussion-panel textarea {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background-color: #222;
+  color: #eee;
+}
+
+.discussion-panel input[type="file"] {
+  margin-bottom: 8px;
+}
+
+.discussion-panel button {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    padding: 10px 0;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 260px;
+    margin: 10px auto 0 auto;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px 0 #ff3c6f33;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+}
+
+.discussion-panel button:hover:not(.uploading) {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
+}
+
+/* Update the uploading state to maintain consistent styling */
+.comment-submit-btn.uploading {
+    background: linear-gradient(90deg, #888, #666) !important;
+    cursor: wait;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Update the success state to maintain consistent styling */
+.comment-submit-btn.upload-success {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-color)) !important;
+    color: #fff;
+    animation: pop-success 0.5s;
+}
+@keyframes pop-success {
+  0% { transform: scale(1); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
     .layout-container {
@@ -341,71 +440,54 @@ button[type="submit"]:hover,
     margin-bottom: 20px;
     border: 1.5px solid #232323;
 }
+
+    .discussion-panel {
+        padding: 15px;
+        margin: 10px -5px;
+        width: calc(100% + 10px);
     }
-    h1 { font-size: 1.4rem; }
-    h2 { font-size: 1.25rem; }
-    h3 { font-size: 1.1rem; }
 
-/* Removed unnecessary .participants-list::after rule */
-h1, h2, h3 {
-    font-family: var(--font-family-primary);
-    font-weight: 700;
-    line-height: 1.2;
-    color: #f0f0f0;
-    margin-top: 0;
-    margin-bottom: 0.6em;
-}
+    .discussion-panel input[type="text"],
+    .discussion-panel textarea {
+        padding: 8px;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
 
-h1 {
-    font-size: 2rem;
-    color: #ffffff;
-    border-bottom: 2px solid #00cc4e;
-    padding-bottom: 0.3rem;
-}
+    .discussion-panel button {
+        height: 40px;
+        font-size: 0.95rem;
+        width: 100%;
+        max-width: none;
+        margin: 5px 0;
+    }
 
-h2 {
+    .comment-list {
+        margin-top: 15px;
+    }
+
+    .comment-list li {
+        padding: 10px;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .comment-list img {
+        max-width: 100%;
+        height: auto;
+        margin: 8px 0;
+    }
+
+    .countdown-number {
     font-size: 1.5rem;
-    color: #dddddd;
-    border-left: 4px solid #00cc4e;
-    padding-left: 10px;
 }
 
-h3 {
-    font-size: 1.25rem;
-    color: #bbbbbb;
+.countdown-number span {
+    padding: 4px 8px;
+    font-size: 0.9rem;
 }
 
-/* Paragraflar */
-p {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #cccccc;
-    margin-bottom: 1rem;
+.time-label {
+    font-size: 0.8rem;
 }
-/* ===================== */
-/* Floating Action Button */
-/* ===================== */
-
-.floating-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-    color: #fff;
-    font-size: 2rem;
-    font-weight: bold;
-    text-align: center;
-    line-height: 60px;
-    border-radius: 50%;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-    z-index: 1000;
-    text-decoration: none;
-    transition: all 0.25s ease;
-}
-
-.floating-button:hover {
-    transform: scale(1.08);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
