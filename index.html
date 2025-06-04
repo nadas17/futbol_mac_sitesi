@@ -403,6 +403,7 @@ const COMMENTS_IMAGES_FOLDER = 'match-comments-images';
 
 // Yorumları çek ve listele
 const commentsCache = new Map();
+let commentSubscriptions = new Map();
 
 async function fetchComments(matchId, container) {
   const listEl = container.querySelector('.comment-list');
@@ -538,27 +539,30 @@ async function submitComment(matchId, container) {
   }
 
   // Yorum kaydet
-  const { error: insertError } = await supabase
-    .from('match_comments')
-    .insert([{
-      match_id: matchId,
-      username: username || null,
-      comment,
-      image_url: imageUrl,
-    }]);
+  try {
+    const { error: insertError } = await supabase
+      .from('match_comments')
+      .insert([{
+        match_id: matchId,
+        username: username || null,
+        comment,
+        image_url: imageUrl,
+      }]);
 
-  if (insertError) {
-    alert('Failed to save comment: ' + insertError.message);
-    return;
+    if (insertError) throw insertError;
+
+    // Clear input fields
+    usernameInput.value = '';
+    commentInput.value = '';
+    imageInput.value = '';
+
+    // No need to manually fetch comments here
+    // The subscription will handle updating the UI
+    
+  } catch (error) {
+    console.error('Error submitting comment:', error);
+    alert('Failed to save comment: ' + error.message);
   }
-
-  // Alanları temizle
-  usernameInput.value = '';
-  commentInput.value = '';
-  imageInput.value = '';
-
-  // Yorumları yeniden yükle
-  await fetchComments(matchId, container);
 }
 
 // Maç kartı yüklendiğinde event listener ekle
@@ -566,8 +570,36 @@ function setupDiscussionPanel(matchElement, matchId) {
   const container = matchElement.querySelector('.discussion-panel');
   const sendBtn = container.querySelector('.comment-submit-btn');
   sendBtn.onclick = () => submitComment(matchId, container);
+  
+  // Initial fetch
   fetchComments(matchId, container);
+  
+  // Setup real-time subscription
+  if (!commentSubscriptions.has(matchId)) {
+      const subscription = supabase
+          .channel(`match_comments_${matchId}`)
+          .on('postgres_changes', {
+              event: '*',
+              schema: 'public',
+              table: 'match_comments',
+              filter: `match_id=eq.${matchId}`
+          }, async (payload) => {
+              // Refresh comments when changes occur
+              await fetchComments(matchId, container);
+          })
+          .subscribe();
+          
+      commentSubscriptions.set(matchId, subscription);
+  }
 }
+
+// Add cleanup function to remove subscriptions when leaving the page
+window.addEventListener('beforeunload', () => {
+    for (let [matchId, subscription] of commentSubscriptions) {
+        subscription.unsubscribe();
+    }
+    commentSubscriptions.clear();
+});
     
     </script>
     <a href="create_match.html" class="floating-button" title="Create New Match">＋</a>
