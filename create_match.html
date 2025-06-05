@@ -68,8 +68,12 @@
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // Supabase operations should be handled server-side for security.
+
+        const SUPABASE_URL = 'https://vobkewbonknvuvexnvpc.supabase.co'; // Replace with your Supabase URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvYmtld2JvbmtudnV2ZXhudnBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNTk2ODMsImV4cCI6MjA2MjgzNTY4M30.RH99CuHgv4XnV5XFnmykUP0OfPw3QTJfXp9W-MoQnF0';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -255,15 +259,6 @@
             submitButton.disabled = true;
             submitButton.textContent = 'Creating...';
 
-            // Validate all steps before proceeding (optional: implement if needed)
-            // for (let i = 0; i < formSteps.length; i++) {
-            //     if (!validateStep(i)) {
-            //         submitButton.disabled = false;
-            //         submitButton.textContent = originalButtonText;
-            //         return;
-            //     }
-            // }
-
             // Collect form data
             const title = document.getElementById('title').value;
             const match_date = document.getElementById('match_date').value;
@@ -274,42 +269,28 @@
             const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
             const description = document.getElementById('description').value || null;
 
-            // Example: send data to your server (replace URL and logic as needed)
-            let retries = 3;
-            let result = null;
-            let error = null;
-            while (retries > 0) {
-                try {
-                    // Replace the URL and method as needed for your backend
-                    const { data, error } = await supabase
-                      .from('matches')
-                      .insert([{
-                        title,
-                        match_date,
-                        match_time,
-                        location,
-                        max_players,
-                        price_per_player,
-                        description
-                      }]);
+            // Insert directly into Supabase
+            const { data, error } = await supabase
+                .from('matches')
+                .insert([{
+                    title,
+                    match_date,
+                    match_time,
+                    location,
+                    max_players,
+                    price_per_player,
+                    description
+                }]);
 
-                    if (error) {
-                      showMessage('Failed to create match: ' + error.message, 'error');
-                    } else {
-                      showMessage('Match created successfully!', 'success');
-                      form.reset();
-                      setTimeout(() => {
-                        window.location.href = 'index.html';
-                      }, 2000);
-                    }
-                    break;
-                } catch (err) {
-                    retries--;
-                    error = err;
-                    if (retries === 0) {
-                        showMessage('Network error: Unable to create match after multiple attempts.', 'error');
-                    }
-                }
+            if (error) {
+                showMessage('Failed to create match: ' + error.message, 'error');
+                console.error(error);
+            } else {
+                showMessage('Match created successfully!', 'success');
+                form.reset();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
             }
 
             submitButton.disabled = false;
