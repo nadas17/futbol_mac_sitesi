@@ -71,6 +71,8 @@
     <script>
         // Supabase operations should be handled server-side for security.
 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const form = document.getElementById('create-match-form');
         const messageDiv = document.getElementById('form-message');
 
@@ -279,31 +281,28 @@
             while (retries > 0) {
                 try {
                     // Replace the URL and method as needed for your backend
-                    const response = await fetch('/api/create-match', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title,
-                            match_date,
-                            match_time,
-                            location,
-                            max_players,
-                            price_per_player,
-                            description
-                        })
-                    });
-                    result = await response.json();
-                    if (response.ok) {
-                        showMessage('Match created successfully!', 'success');
-                        form.reset();
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 2000);
-                        break;
+                    const { data, error } = await supabase
+                      .from('matches')
+                      .insert([{
+                        title,
+                        match_date,
+                        match_time,
+                        location,
+                        max_players,
+                        price_per_player,
+                        description
+                      }]);
+
+                    if (error) {
+                      showMessage('Failed to create match: ' + error.message, 'error');
                     } else {
-                        showMessage('Failed to create match: ' + (result.error || 'Unknown error'), 'error');
-                        break;
+                      showMessage('Match created successfully!', 'success');
+                      form.reset();
+                      setTimeout(() => {
+                        window.location.href = 'index.html';
+                      }, 2000);
                     }
+                    break;
                 } catch (err) {
                     retries--;
                     error = err;
