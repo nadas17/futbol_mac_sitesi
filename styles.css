@@ -1,6 +1,29 @@
+/* 
+ * Stylesheet for Futbol Maç Sitesi
+ * 
+ * Purpose:
+ * This file contains the CSS styles for the Futbol Maç Sitesi project, including layout, typography, 
+ * form elements, buttons, and responsive design. It defines the visual appearance and behavior of 
+ * various components used throughout the site.
+ * 
+ * Structure:
+ * 1. Root Variables: Defines reusable CSS variables for colors, fonts, and other design tokens.
+ * 2. Base Styles: Sets global styles for the body and other foundational elements.
+ * 3. Layout and Components: Includes styles for containers, cards, forms, buttons, and other UI elements.
+ * 4. Responsive Design: Adjusts styles for smaller screens to ensure a mobile-friendly experience.
+ * 
+ * Key Sections:
+ * - Root Variables: Centralized design tokens for consistent theming.
+ * - Forms: Styles for input fields, labels, and buttons.
+ * - Participants List: Custom styles for displaying participant names and actions.
+ * - Countdown Timer: Visual styling for the countdown timer component.
+ * - Discussion Panel: Styles for the discussion input and comment list.
+ * - Responsive Design: Media queries for adapting the layout to smaller screens.
+ */
+
 /* Root Variables */
 :root {
-    --primary-color: #00cc4e;
+    --primary-color-main: #00cc4e;
     --primary-hover: #02006e;
     --success-bg: #232323;
     --success-border: #3cfa9b;
@@ -16,26 +39,31 @@
     --input-bg: #232323;
     --input-border: #333;
     --input-focus: #00cc4e;
-    --input-focus-shadow: rgba(0, 204, 78, 0.25); /* Derived from --input-focus */
+    --input-focus-shadow: rgba(0, 204, 78, 0.25); /* Derived from --input-focus; this shadow is used to create a subtle glowing effect around focused input fields, enhancing visibility and user experience */
 }
 
 /* Base Styles */
 body {
-    padding-top: 40px;
-    font-family: var(--font-family-primary);
+    background: url('images/2.jpg') no-repeat center center fixed;
+    background-size: cover;
+    background-color: #181818; /* fallback */
+    font-family: 'Montserrat', Arial, sans-serif;
+    color: #fff; /* Ensures text is white by default */
     min-height: 100vh;
     margin: 0;
     padding: 0;
-    color: #f5f5f5;
-    background: var(--bg-dark);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* Arka plan fotoğrafı ekle */
-    background-image: url('images/2.jpg');
+}
+
+.padding-top {
+    padding-top: 40px;
+}
+
+/* Special background for create match page */
+body.create-match-bg {
+    background: url('images/1.jpg') no-repeat center center fixed;
     background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-color: #181818;
+    color: #fff;
 }
 
 /* Layout Container */
@@ -53,7 +81,7 @@ body {
     background: rgba(20, 20, 20, 0.9);
     backdrop-filter: blur(5px);
     border-radius: var(--border-radius);
-    padding: 20px;
+    background: rgba(30, 30, 30, 0.3);
     margin-bottom: 30px;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
@@ -156,7 +184,7 @@ button[type="submit"],
 .join-match-btn, 
 .admin-link, 
 .dynamic-button {
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    background: linear-gradient(90deg, var(--primary-color-main), var(--primary-hover));
     color: #fff;
     padding: 10px 0;
     border: none;
@@ -177,7 +205,7 @@ button[type="submit"]:hover,
 .join-match-btn:hover:not(:disabled),
 .admin-link:hover,
 .dynamic-button:hover {
-    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color-main));
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
 }
@@ -185,7 +213,7 @@ button[type="submit"]:hover,
 
 .join-match-btn:disabled,
 .join-match-btn.disabled {
-    background: #dc3545; /* Keep this red, it's clear for "Match Full" */
+    background: var(--error-bg); /* Matches the project's design system */
     color: #fff; /* Ensure text is white and legible on red */
     cursor: not-allowed;
     opacity: 0.75; /* Slightly more faded */
@@ -308,7 +336,7 @@ button[type="submit"]:hover,
 
 /* Make participant name turn green on hover */
 .participants-list li:hover {
-    color: var(--primary-color);
+    color: #00ff6e; /* Adjusted to a lighter shade for better contrast */
 }
 
 /* Countdown Timer */
@@ -396,7 +424,7 @@ button[type="submit"]:hover,
 }
 
 /* Update the uploading state to maintain consistent styling */
-.comment-submit-btn.uploading {
+.comment-submit-btn--uploading {
     background: linear-gradient(90deg, #888, #666) !important;
     cursor: wait;
     opacity: 0.7;
@@ -405,8 +433,8 @@ button[type="submit"]:hover,
 }
 
 /* Update the success state to maintain consistent styling */
-.comment-submit-btn.upload-success {
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-color)) !important;
+.comment-submit-btn--upload-success {
+    background: linear-gradient(90deg, var(--primary-color-main), var(--primary-color-main)) !important;
     color: #fff;
     animation: pop-success 0.5s;
 }
@@ -420,74 +448,76 @@ button[type="submit"]:hover,
 @media (max-width: 480px) {
     .layout-container {
         grid-template-columns: 1fr;
+        gap: 10px; /* Reduce gap for smaller screens */
     }
     
     .container {
-        padding: 12px 2vw 10px 2vw;
-        margin: 10px auto;
-        max-width: 98vw;
+        padding: 8px 2vw 8px 2vw; /* Reduce padding for better fit */
+        margin: 8px auto;
+        max-width: 95vw; /* Slightly reduce max width */
     }
     
     input, textarea, button[type="submit"], .message {
-        max-width: 98vw;
-        font-size: 0.93rem;
+        max-width: 95vw; /* Reduce max width for better alignment */
+        font-size: 0.9rem; /* Slightly smaller font size */
     }
+
     .section-box {
-    background: rgba(24, 24, 24, 0.35);
-    border-radius: var(--border-radius);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
-    padding: 20px;
-    margin-bottom: 20px;
-    border: 1.5px solid #232323;
-}
+        background: rgba(24, 24, 24, 0.3); /* Slightly lighter background */
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.35); /* Reduce shadow intensity */
+        padding: 16px; /* Reduce padding */
+        margin-bottom: 16px; /* Reduce margin */
+        border: 1px solid #232323; /* Slightly thinner border */
+    }
 
     .discussion-panel {
-        padding: 15px;
-        margin: 10px -5px;
+        padding: 10px; /* Reduce padding */
+        margin: 8px -5px;
         width: calc(100% + 10px);
     }
 
     .discussion-panel input[type="text"],
     .discussion-panel textarea {
-        padding: 8px;
-        font-size: 0.95rem;
-        margin-bottom: 10px;
+        padding: 6px; /* Reduce padding */
+        font-size: 0.9rem; /* Slightly smaller font size */
+        margin-bottom: 8px; /* Reduce margin */
     }
 
     .discussion-panel button {
-        height: 40px;
-        font-size: 0.95rem;
+        height: 36px; /* Reduce height */
+        font-size: 0.9rem; /* Slightly smaller font size */
         width: 100%;
         max-width: none;
-        margin: 5px 0;
+        margin: 4px 0; /* Reduce margin */
     }
 
     .comment-list {
-        margin-top: 15px;
+        margin-top: 12px; /* Reduce margin */
     }
 
     .comment-list li {
-        padding: 10px;
-        font-size: 0.95rem;
-        margin-bottom: 8px;
+        padding: 8px; /* Reduce padding */
+        font-size: 0.9rem; /* Slightly smaller font size */
+        margin-bottom: 6px; /* Reduce margin */
     }
 
     .comment-list img {
-        max-width: 100%;
+        max-width: 90%; /* Reduce image size for better fit */
         height: auto;
-        margin: 8px 0;
+        margin: 6px 0; /* Reduce margin */
     }
 
     .countdown-number {
-    font-size: 1.5rem;
-}
-
+        font-size: 1.4rem; /* Slightly smaller font size */
 .countdown-number span {
-    padding: 4px 8px;
+    padding: 5px 10px; /* Aligned with the non-responsive section for consistency */
     font-size: 0.9rem;
 }
+        font-size: 0.85rem; /* Slightly smaller font size */
+    }
 
-.time-label {
-    font-size: 0.8rem;
-}
+    .time-label {
+        font-size: 0.75rem; /* Slightly smaller font size */
+    }
 }

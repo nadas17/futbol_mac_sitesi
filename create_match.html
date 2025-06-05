@@ -8,46 +8,60 @@
     <link rel="stylesheet" href="styles.css">
     <!-- Supabase operations should be handled server-side for security -->
 </head>
-<body>
+<body class="create-match-bg">
 
     <div class="container">
         <h1>Create New Match</h1>
         <div id="progress-indicator"></div> <!-- Progress indicator placeholder -->
         <form id="create-match-form">
             <div class="form-step">
-                <label for="title">Match Title:</label>
-                <input type="text" id="title" name="title" required>
+                <div class="form-group">
+                    <label for="title">Match Title:</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
             </div>
 
             <div class="form-step">
-                <label for="match_date">Date:</label>
-                <input type="date" id="match_date" name="match_date" required>
+                <div class="form-group">
+                    <label for="match_date">Date:</label>
+                    <input type="date" id="match_date" name="match_date" required>
+                </div>
             </div>
 
             <div class="form-step">
-                <label for="match_time">Time:</label>
-                <input type="time" id="match_time" name="match_time" required>
+                <div class="form-group">
+                    <label for="match_time">Time:</label>
+                    <input type="time" id="match_time" name="match_time" required>
+                </div>
             </div>
 
             <div class="form-step">
-                <label for="location">Location:</label>
-                <input type="text" id="location" name="location" required>
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
             </div>
 
             <div class="form-step">
-                <label for="max_players">Maximum Number of Players:</label>
-                <input type="number" id="max_players" name="max_players" min="1" required>
+                <div class="form-group">
+                    <label for="max_players">Maximum Number of Players:</label>
+                    <input type="number" id="max_players" name="max_players" min="1" required>
+                </div>
             </div>
 
             <div class="form-step">
-                <label for="price_per_player">Price (PLN/player, optional - leave empty for no price):</label>
-                <input type="number" id="price_per_player" name="price_per_player" min="0" step="0.01" placeholder="Enter price or leave empty">
+                <div class="form-group">
+                    <label for="price_per_player">Price (PLN/player, optional - leave empty for no price):</label>
+                    <input type="number" id="price_per_player" name="price_per_player" min="0" step="0.01" placeholder="Enter price or leave empty">
+                </div>
             </div>
 
             <div class="form-step">
-                <label for="description">Description (optional):</label>
-                <textarea id="description" name="description"></textarea>
-                <button type="submit">Create Match</button> <!-- Submit button in the last step -->
+                <div class="form-group">
+                    <label for="description">Description (optional):</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+                <button type="submit" class="dynamic-button">Create Match</button>
             </div>
 
             <div id="form-message" class="message" style="display: none;"></div>
@@ -71,7 +85,7 @@
                 step.classList.toggle('active', index === stepIndex);
             });
 
-            submitBtn.style.display = stepIndex === formSteps.length - 1 ? 'inline-block' : 'none';
+            submitBtn.style.display = 'inline-block';
             
             updateProgressIndicator();
             messageDiv.style.display = 'none'; 
