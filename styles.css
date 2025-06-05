@@ -444,6 +444,18 @@ button[type="submit"]:hover,
   100% { transform: scale(1); }
 }
 
+/* Invalid Field Styles */
+.invalid {
+    border-color: #ff3c6f !important;
+    background-color: rgba(255, 60, 111, 0.1);
+}
+
+.field-error {
+    color: #ff3c6f;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
     .layout-container {
