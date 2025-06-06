@@ -1,29 +1,6 @@
-/* 
- * Stylesheet for Futbol Maç Sitesi
- * 
- * Purpose:
- * This file contains the CSS styles for the Futbol Maç Sitesi project, including layout, typography, 
- * form elements, buttons, and responsive design. It defines the visual appearance and behavior of 
- * various components used throughout the site.
- * 
- * Structure:
- * 1. Root Variables: Defines reusable CSS variables for colors, fonts, and other design tokens.
- * 2. Base Styles: Sets global styles for the body and other foundational elements.
- * 3. Layout and Components: Includes styles for containers, cards, forms, buttons, and other UI elements.
- * 4. Responsive Design: Adjusts styles for smaller screens to ensure a mobile-friendly experience.
- * 
- * Key Sections:
- * - Root Variables: Centralized design tokens for consistent theming.
- * - Forms: Styles for input fields, labels, and buttons.
- * - Participants List: Custom styles for displaying participant names and actions.
- * - Countdown Timer: Visual styling for the countdown timer component.
- * - Discussion Panel: Styles for the discussion input and comment list.
- * - Responsive Design: Media queries for adapting the layout to smaller screens.
- */
-
 /* Root Variables */
 :root {
-    --primary-color-main: #00cc4e;
+    --primary-color: #00cc4e;
     --primary-hover: #02006e;
     --success-bg: #232323;
     --success-border: #3cfa9b;
@@ -39,31 +16,26 @@
     --input-bg: #232323;
     --input-border: #333;
     --input-focus: #00cc4e;
-    --input-focus-shadow: rgba(0, 204, 78, 0.25); /* Derived from --input-focus; this shadow is used to create a subtle glowing effect around focused input fields, enhancing visibility and user experience */
+    --input-focus-shadow: rgba(0, 204, 78, 0.25); /* Derived from --input-focus */
 }
 
 /* Base Styles */
 body {
-    background: url('images/2.jpg') no-repeat center center fixed;
-    background-size: cover;
-    background-color: #181818; /* fallback */
-    font-family: 'Montserrat', Arial, sans-serif;
-    color: #fff; /* Ensures text is white by default */
+    padding-top: 40px;
+    font-family: var(--font-family-primary);
     min-height: 100vh;
     margin: 0;
     padding: 0;
-}
-
-.padding-top {
-    padding-top: 40px;
-}
-
-/* Special background for create match page */
-body.create-match-bg {
-    background: url('images/1.jpg') no-repeat center center fixed;
+    color: #f5f5f5;
+    background: var(--bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Arka plan fotoğrafı ekle */
+    background-image: url('images/2.jpg');
     background-size: cover;
-    background-color: #181818;
-    color: #fff;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* Layout Container */
@@ -81,7 +53,7 @@ body.create-match-bg {
     background: rgba(20, 20, 20, 0.9);
     backdrop-filter: blur(5px);
     border-radius: var(--border-radius);
-    background: rgba(30, 30, 30, 0.3);
+    padding: 20px;
     margin-bottom: 30px;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
@@ -113,70 +85,46 @@ body.create-match-bg {
 }
 
 .container {
-    max-width: 340px;
-    width: 96vw;
-    margin: 32px auto;
-    padding: 24px 10px 18px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Forms */
-form {
-    width: 100%;
+/* Form group for spacing */
+.form-group {
+    margin-bottom: 22px;
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
-    align-items: center;
 }
 
-label {
-    display: block;
-    margin-bottom: 2px;
-    font-size: 0.93rem;
+/* Label styling */
+.form-group label {
     font-weight: 600;
-    color: #f5f5f5;
-    letter-spacing: 0.01em;
-    width: 100%;
-    text-align: left;
+    margin-bottom: 7px;
+    color: #00cc4e;
+    letter-spacing: 0.02em;
 }
 
-/* Form Elements */
-input[type="text"],
-input[type="date"],
-input[type="time"],
-input[type="number"],
-textarea {
-    width: 100%;
-    max-width: 260px;
-    margin: 0 auto 8px auto;
-    padding: 7px 10px;
-    font-size: 0.95rem;
-    border: 1.2px solid var(--input-border);
-    border-radius: 7px;
-    background: var(--input-bg);
-    color: #f5f5f5;
-    transition: border-color var(--transition-speed) ease, 
-                box-shadow var(--transition-speed) ease;
-    font-family: inherit;
-    display: block;
-    box-sizing: border-box;
-}
-
-input:focus,
-textarea:focus {
-    outline: none;
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 2px var(--input-focus-shadow); /* Standardized focus shadow */
+/* Input and textarea styling */
+.form-group input,
+.form-group textarea {
     background: #181818;
-    color: #fff;
+    border: 1.5px solid #232323;
+    border-radius: 7px;
+    padding: 10px 12px;
+    color: #f2f2f2;
+    font-size: 1rem;
+    transition: border 0.2s;
+    outline: none;
 }
 
-textarea {
-    min-height: 54px;
-    resize: vertical;
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #00cc4e;
+    background: #202820;
 }
 
 /* Buttons */
@@ -184,7 +132,7 @@ button[type="submit"],
 .join-match-btn, 
 .admin-link, 
 .dynamic-button {
-    background: linear-gradient(90deg, var(--primary-color-main), var(--primary-hover));
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
     color: #fff;
     padding: 10px 0;
     border: none;
@@ -205,7 +153,7 @@ button[type="submit"]:hover,
 .join-match-btn:hover:not(:disabled),
 .admin-link:hover,
 .dynamic-button:hover {
-    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color-main));
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
 }
@@ -213,7 +161,7 @@ button[type="submit"]:hover,
 
 .join-match-btn:disabled,
 .join-match-btn.disabled {
-    background: var(--error-bg); /* Matches the project's design system */
+    background: #dc3545; /* Keep this red, it's clear for "Match Full" */
     color: #fff; /* Ensure text is white and legible on red */
     cursor: not-allowed;
     opacity: 0.75; /* Slightly more faded */
@@ -241,6 +189,32 @@ button[type="submit"]:hover,
     height: 44px; /* Yükseklik sabitle */
     min-width: 160px;
     margin: 0 auto;
+}
+
+/* Create New Match başlığı için gradient ve buton uyumu */
+.create-match-title {
+    font-size: 2.1rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 28px;
+    background: linear-gradient(270deg, var(--primary-color), var(--primary-hover), var(--primary-color));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+    letter-spacing: 0.03em;
+    animation: flowing-gradient 7s linear infinite;
+    transition: background 0.3s;
+}
+
+@keyframes flowing-gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
 }
 
 /* Delete Button */
@@ -336,7 +310,7 @@ button[type="submit"]:hover,
 
 /* Make participant name turn green on hover */
 .participants-list li:hover {
-    color: #00ff6e; /* Adjusted to a lighter shade for better contrast */
+    color: var(--primary-color);
 }
 
 /* Countdown Timer */
@@ -424,7 +398,7 @@ button[type="submit"]:hover,
 }
 
 /* Update the uploading state to maintain consistent styling */
-.comment-submit-btn--uploading {
+.comment-submit-btn.uploading {
     background: linear-gradient(90deg, #888, #666) !important;
     cursor: wait;
     opacity: 0.7;
@@ -433,8 +407,8 @@ button[type="submit"]:hover,
 }
 
 /* Update the success state to maintain consistent styling */
-.comment-submit-btn--upload-success {
-    background: linear-gradient(90deg, var(--primary-color-main), var(--primary-color-main)) !important;
+.comment-submit-btn.upload-success {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-color)) !important;
     color: #fff;
     animation: pop-success 0.5s;
 }
@@ -444,92 +418,296 @@ button[type="submit"]:hover,
   100% { transform: scale(1); }
 }
 
-/* Invalid Field Styles */
+/* Form step styles */
+.form-steps {
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+}
+
+.form-step {
+    display: none;
+    position: static;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+    width: 100%;
+}
+
+.form-step.active {
+    display: block;
+    position: relative;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* Input styles */
+.form-step label {
+    display: block;
+    margin-bottom: 10px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.form-step input,
+.form-step textarea {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.form-step input:focus,
+.form-step textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Container ve form adımları için kutu modeli düzeltmesi */
+.container,
+.form-steps,
+.form-step,
+.form-step input,
+.form-step textarea {
+    box-sizing: border-box;
+}
+
+/* Input ve textarea'ların kutuya tam oturması için */
+.form-step input,
+.form-step textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    display: block;
+}
+
+/* Step progress bar */
+.step-progress {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 10px;
+}
+
+.step {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Navigation buttons */
+.form-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.nav-btn,
+#submitBtn {
+    padding: 12px 0;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 260px;
+    margin: 10px auto 0 auto;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px 0 #ff3c6f33;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: block;
+}
+
+.nav-btn:hover,
+#submitBtn:hover {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
+}
+
+/* Error states */
 .invalid {
     border-color: #ff3c6f !important;
-    background-color: rgba(255, 60, 111, 0.1);
 }
 
 .field-error {
     color: #ff3c6f;
-    font-size: 0.85rem;
-    margin-top: 4px;
+    font-size: 14px;
+    margin-top: -15px;
+    margin-bottom: 15px;
+}
+
+/* Message styles */
+.message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.message.success {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+}
+
+.message.error {
+    background: rgba(255, 60, 111, 0.1);
+    color: #ff3c6f;
 }
 
 /* Responsive Design */
 @media (max-width: 480px) {
     .layout-container {
         grid-template-columns: 1fr;
-        gap: 10px; /* Reduce gap for smaller screens */
     }
     
     .container {
-        padding: 8px 2vw 8px 2vw; /* Reduce padding for better fit */
-        margin: 8px auto;
-        max-width: 95vw; /* Slightly reduce max width */
+        padding: 12px 2vw 10px 2vw;
+        margin: 10px auto;
+        max-width: 98vw;
     }
     
     input, textarea, button[type="submit"], .message {
-        max-width: 95vw; /* Reduce max width for better alignment */
-        font-size: 0.9rem; /* Slightly smaller font size */
+        max-width: 98vw;
+        font-size: 0.93rem;
     }
-
     .section-box {
-        background: rgba(24, 24, 24, 0.3); /* Slightly lighter background */
-        border-radius: var(--border-radius);
-        box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.35); /* Reduce shadow intensity */
-        padding: 16px; /* Reduce padding */
-        margin-bottom: 16px; /* Reduce margin */
-        border: 1px solid #232323; /* Slightly thinner border */
-    }
+    background: rgba(24, 24, 24, 0.35);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1.5px solid #232323;
+}
 
     .discussion-panel {
-        padding: 10px; /* Reduce padding */
-        margin: 8px -5px;
+        padding: 15px;
+        margin: 10px -5px;
         width: calc(100% + 10px);
     }
 
     .discussion-panel input[type="text"],
     .discussion-panel textarea {
-        padding: 6px; /* Reduce padding */
-        font-size: 0.9rem; /* Slightly smaller font size */
-        margin-bottom: 8px; /* Reduce margin */
+        padding: 8px;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
     }
 
     .discussion-panel button {
-        height: 36px; /* Reduce height */
-        font-size: 0.9rem; /* Slightly smaller font size */
+        height: 40px;
+        font-size: 0.95rem;
         width: 100%;
         max-width: none;
-        margin: 4px 0; /* Reduce margin */
+        margin: 5px 0;
     }
 
     .comment-list {
-        margin-top: 12px; /* Reduce margin */
+        margin-top: 15px;
     }
 
     .comment-list li {
-        padding: 8px; /* Reduce padding */
-        font-size: 0.9rem; /* Slightly smaller font size */
-        margin-bottom: 6px; /* Reduce margin */
+        padding: 10px;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
     }
 
     .comment-list img {
-        max-width: 90%; /* Reduce image size for better fit */
+        max-width: 100%;
         height: auto;
-        margin: 6px 0; /* Reduce margin */
+        margin: 8px 0;
     }
 
     .countdown-number {
-        font-size: 1.4rem; /* Slightly smaller font size */
+    font-size: 1.5rem;
+}
+
 .countdown-number span {
-    padding: 5px 10px; /* Aligned with the non-responsive section for consistency */
+    padding: 4px 8px;
     font-size: 0.9rem;
 }
-        font-size: 0.85rem; /* Slightly smaller font size */
-    }
 
-    .time-label {
-        font-size: 0.75rem; /* Slightly smaller font size */
+.time-label {
+    font-size: 0.8rem;
+}
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 16px 4vw 18px 4vw;
+        max-width: 98vw;
     }
+    .form-group input,
+    .form-group textarea {
+        font-size: 0.98rem;
+        padding: 9px 8px;
+    }
+}
+
+/* Form Styles */
+.form-steps {
+    position: relative;
+    width: 100%;
+    min-height: 180px;
+    margin-bottom: 18px;
+}
+.form-step {
+    display: none;
+    position: static;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+    width: 100%;
+}
+
+/* Step Progress Bar Styles */
+.step-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    margin-bottom: 32px;
+    overflow: hidden;
+}
+
+.step-progress-bar-inner {
+    height: 100%;
+    background: var(--primary-color, #00cc4e);
+    width: 0%;
+    border-radius: 6px;
+    transition: width 0.3s;
 }
