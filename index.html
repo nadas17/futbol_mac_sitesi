@@ -132,6 +132,14 @@
                 participantsList.style.display = isOpen ? 'none' : 'block';
                 toggleBtn.querySelector('.arrow').textContent = isOpen ? '▼' : '▲';
             });
+
+            // Katılımcı sayısı quota'ya eşit veya büyükse kırmızı yap
+            const participantCountSpan = matchElement.querySelector('.participant-count');
+            if (match.current_players >= match.max_players) {
+                participantCountSpan.classList.add('full');
+            } else {
+                participantCountSpan.classList.remove('full');
+            }
         }
         updateCountdown(matches);
     }

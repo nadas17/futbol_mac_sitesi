@@ -723,9 +723,15 @@ button[type="submit"]:hover,
 }
 
 .participant-count {
-    color: #fff;
+    color: #00cc4e;
     font-weight: 600;
     margin: 0 2px;
+    transition: color 0.2s;
+}
+
+/* Katılımcı sayısı quota dolduysa kırmızı */
+.participant-count.full {
+    color: #ff3c6f !important;
 }
 
 /* Mobil uyumluluk */
