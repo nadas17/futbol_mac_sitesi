@@ -166,6 +166,7 @@
             });
 
             function showMessage(msg, type) {
+                if (!messageDiv) return; // Eğer div yoksa hata vermesin
                 messageDiv.textContent = msg;
                 messageDiv.className = `message ${type}`;
                 messageDiv.style.display = 'block';
