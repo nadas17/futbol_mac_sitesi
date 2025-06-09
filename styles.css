@@ -950,3 +950,37 @@ button[type="submit"]:hover,
         margin-top: 7px !important;
     }
 }
+
+/* Progress bar ana stil */
+.step-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+}
+
+.step-progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    border-radius: 6px;
+    transition: width 0.3s;
+    width: 0;
+}
+
+/* Mobilde de görünür ve tam genişlikte olsun */
+@media (max-width: 600px) {
+    .step-progress-bar {
+        height: 8px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        margin-bottom: 18px !important;
+        background: rgba(255,255,255,0.15) !important;
+    }
+    .step-progress-bar-inner {
+        height: 100% !important;
+        border-radius: 6px !important;
+    }
+}
