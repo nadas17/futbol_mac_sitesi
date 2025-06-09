@@ -90,13 +90,13 @@
                 <p><strong>Time:</strong> ${match.match_time.substring(0, 5)}</p>
                 <p><strong>Location:</strong> ${match.location}</p>
                 <p><strong>Description:</strong> ${match.description || ''}</p>
-                <div class="participants-list">
-                    <div style="margin-bottom:8px;">
-                        <strong>Participants/Quota:</strong>
+                <div class="participants-list-accordion">
+                    <button class="participants-toggle">Participants/Quota: 
                         <span class="participant-count" data-max-players="${match.max_players}">${match.current_players}</span>
                         / ${match.max_players}
-                    </div>
-                    <ul id="participants-${match.id}">Loading...</ul>
+                        <span class="arrow">▼</span>
+                    </button>
+                    <ul id="participants-${match.id}" class="participants-list" style="display:none;">Loading...</ul>
                 </div>
                 <button class="join-match-btn" 
                         data-match-id="${match.id}"
@@ -122,6 +122,15 @@
             joinButton.onclick = () => showJoinMatchForm(match.id, joinButton);
             fetchParticipants(match.id);
             setupDiscussionPanel(matchElement, match.id);
+
+            // Accordion aç/kapa
+            const toggleBtn = matchElement.querySelector('.participants-toggle');
+            const participantsList = matchElement.querySelector('.participants-list');
+            toggleBtn.addEventListener('click', () => {
+                const isOpen = participantsList.style.display === 'block';
+                participantsList.style.display = isOpen ? 'none' : 'block';
+                toggleBtn.querySelector('.arrow').textContent = isOpen ? '▼' : '▲';
+            });
         }
         updateCountdown(matches);
     }
