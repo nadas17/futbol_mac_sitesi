@@ -231,6 +231,14 @@
             const countElem = matchCard.querySelector('.participant-count');
             if (countElem) {
                 countElem.textContent = participants ? participants.length : 0;
+
+                const maxPlayers = parseInt(countElem.dataset.maxPlayers);
+                // KOTA DOLU MU KONTROLÜ BURADA OLSUN
+                if (participants.length >= maxPlayers) {
+                    countElem.classList.add('full');
+                } else {
+                    countElem.classList.remove('full');
+                }
             }
             
             const joinButton = matchCard.querySelector('.join-match-btn');
