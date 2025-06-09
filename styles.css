@@ -407,20 +407,77 @@ button[type="submit"]:hover,
 @media (max-width: 600px) {
     .discussion-panel {
         padding: 10px 4px !important;
-        margin: 8px 0 !important;
-        border-radius: 7px !important;
+        margin: 0 !important;
+        border-radius: 10px !important;
+        box-sizing: border-box;
         width: 100% !important;
         max-width: 100% !important;
     }
-    .discussion-panel input[type="text"],
-    .discussion-panel textarea {
-        padding: 9px 7px !important;
-        font-size: 0.97rem !important;
-        margin-bottom: 8px !important;
+
+    .create-match-title {
+        font-size: 1.3rem !important;
+        margin-bottom: 18px !important;
+        padding: 0 2px !important;
+        word-break: break-word;
     }
-    .discussion-panel button {
+
+    .step-progress-bar {
+        margin-bottom: 18px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .form-steps,
+    .form-step {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .form-step label {
         font-size: 0.97rem !important;
-        margin: 7px 0 0 0 !important;
+        margin-bottom: 6px !important;
+        padding-left: 2px !important;
+    }
+
+    .form-step input,
+    .form-step textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 10px 8px !important;
+        font-size: 1rem !important;
+        margin-bottom: 10px !important;
+        border-radius: 7px !important;
+        box-sizing: border-box;
+    }
+
+    .form-navigation {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .nav-btn,
+    #submitBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 1rem !important;
+        border-radius: 7px !important;
+        margin: 0 !important;
+    }
+
+    .message {
+        margin-top: 14px !important;
+        font-size: 0.97rem !important;
+        padding: 10px 6px !important;
+        border-radius: 7px !important;
+        width: 100% !important;
+        box-sizing: border-box;
     }
 }
 
@@ -723,60 +780,79 @@ button[type="submit"]:hover,
 }
 
 @media (max-width: 600px) {
-    .container,
-    .match-card,
-    .section-box,
-    .sidebar {
-        padding: 12px 6px !important;
-        margin: 10px 0 !important;
+    .container {
+        padding: 10px 4px !important;
+        margin: 0 !important;
         border-radius: 10px !important;
+        box-sizing: border-box;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .create-match-title {
+        font-size: 1.3rem !important;
+        margin-bottom: 18px !important;
+        padding: 0 2px !important;
+        word-break: break-word;
+    }
+
+    .step-progress-bar {
+        margin-bottom: 18px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .form-steps,
+    .form-step {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box;
     }
 
-    .form-group,
-    .form-step,
-    .form-steps {
-        padding: 0 !important;
-        margin: 0 0 14px 0 !important;
+    .form-step label {
+        font-size: 0.97rem !important;
+        margin-bottom: 6px !important;
+        padding-left: 2px !important;
     }
 
     .form-step input,
-    .form-step textarea,
-    .inline-join-input,
-    .inline-join-team {
-        padding: 10px 8px !important;
-        margin-bottom: 10px !important;
-        font-size: 1rem !important;
-        border-radius: 7px !important;
-        box-sizing: border-box;
+    .form-step textarea {
         width: 100% !important;
         max-width: 100% !important;
-    }
-
-    .inline-join-form-container {
-        padding: 10px 6px !important;
-        margin: 10px 0 !important;
-        max-width: 100% !important;
-        border-radius: 8px !important;
-    }
-
-    .participants-list,
-    .discussion-panel {
-        padding: 10px 4px !important;
-        margin: 8px 0 !important;
+        min-width: 0 !important;
+        padding: 10px 8px !important;
+        font-size: 1rem !important;
+        margin-bottom: 10px !important;
         border-radius: 7px !important;
+        box-sizing: border-box;
+    }
+
+    .form-navigation {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100% !important;
+        margin: 0 !important;
     }
 
     .nav-btn,
-    #submitBtn,
-    .join-match-btn,
-    .inline-confirm-button,
-    .inline-cancel-button {
-        max-width: 100% !important;
+    #submitBtn {
         width: 100% !important;
-        margin: 8px 0 0 0 !important;
+        max-width: 100% !important;
         font-size: 1rem !important;
         border-radius: 7px !important;
+        margin: 0 !important;
+    }
+
+    .message {
+        margin-top: 14px !important;
+        font-size: 0.97rem !important;
+        padding: 10px 6px !important;
+        border-radius: 7px !important;
+        width: 100% !important;
+        box-sizing: border-box;
     }
 }
 
