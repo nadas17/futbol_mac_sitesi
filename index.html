@@ -90,6 +90,7 @@
                 <p><strong>Time:</strong> ${match.match_time.substring(0, 5)}</p>
                 <p><strong>Location:</strong> ${match.location}</p>
                 <p><strong>Description:</strong> ${match.description || ''}</p>
+                <p><strong>Price:</strong> ${match.price_per_player ? match.price_per_player + ' PLN' : 'Free'}</p>
                 <div class="participants-list-accordion">
                     <button class="participants-toggle">Participants/Quota: 
                         <span class="participant-count" data-max-players="${match.max_players}">${match.current_players}</span>
