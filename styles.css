@@ -313,6 +313,13 @@ button[type="submit"]:hover,
     color: var(--primary-color);
 }
 
+.participants-list li strong {
+    display: block;
+    margin: 8px 0 4px 0;
+    color: #00cc4e;
+    font-size: 1.05em;
+}
+
 /* Countdown Timer */
 .countdown {
     text-align: center;

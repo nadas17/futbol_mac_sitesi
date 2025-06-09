@@ -156,13 +156,28 @@
         inputField.className = 'inline-join-input';
         formContainer.appendChild(inputField);
 
+        // Takım seçimi için select ekle
+        const teamSelect = document.createElement('select');
+        teamSelect.className = 'inline-join-team';
+        teamSelect.innerHTML = `
+            <option value="" disabled selected>Select Team</option>
+            <option value="A">A Team</option>
+            <option value="B">B Team</option>
+        `;
+        formContainer.appendChild(teamSelect);
+
         // Create "Confirm Join" button
         const confirmButton = document.createElement('button');
         confirmButton.textContent = 'Confirm Join';
         confirmButton.className = 'inline-confirm-button';
         confirmButton.onclick = () => {
             const participantName = inputField.value;
-            addParticipantToMatch(matchId, participantName);
+            const team = teamSelect.value;
+            if (!team) {
+                alert('Please select a team!');
+                return;
+            }
+            addParticipantToMatch(matchId, participantName, team);
             // Remove the form and show the original button
             formContainer.remove();
             buttonElement.style.display = ''; // Show the original button
@@ -172,11 +187,10 @@
         // Create "Cancel" button
         const cancelButton = document.createElement('button');
         cancelButton.textContent = 'Cancel';
-        cancelButton.className = 'inline-cancel-button'; // Add a class for styling
+        cancelButton.className = 'inline-cancel-button';
         cancelButton.onclick = () => {
-            // Remove the form and show the original button
             formContainer.remove();
-            buttonElement.style.display = ''; // Show the original button
+            buttonElement.style.display = '';
         };
         formContainer.appendChild(cancelButton);
 
@@ -227,15 +241,26 @@
         }
 
         // Update participants list with delete buttons
-        participantsList.innerHTML = participants && participants.length > 0
-            ? participants.map(p => `
+        // Katılımcıları takımlara ayır
+        const teamA = participants.filter(p => p.team === 'A');
+        const teamB = participants.filter(p => p.team === 'B');
+
+        participantsList.innerHTML = `
+            <li><strong>A Team</strong></li>
+            ${teamA.length > 0 ? teamA.map(p => `
                 <li>
                     ${p.participant_name}
-                    <button class="delete-participant" data-id="${p.id}">
-                        Delete
-                    </button>
-                </li>`).join('')
-            : '<li>No participants yet</li>';
+                    <button class="delete-participant" data-id="${p.id}">Delete</button>
+                </li>
+            `).join('') : '<li style="color:#888;">No participants in A Team</li>'}
+            <li><strong>B Team</strong></li>
+            ${teamB.length > 0 ? teamB.map(p => `
+                <li>
+                    ${p.participant_name}
+                    <button class="delete-participant" data-id="${p.id}">Delete</button>
+                </li>
+            `).join('') : '<li style="color:#888;">No participants in B Team</li>'}
+        `;
 
         // Add event listeners to delete buttons
         participantsList.querySelectorAll('.delete-participant').forEach(button => {
@@ -313,9 +338,13 @@
      * @param {number} matchId - The ID of the match to join.
      * @param {string} participantName - The name of the participant.
      */
-    async function addParticipantToMatch(matchId, participantName) {
+    async function addParticipantToMatch(matchId, participantName, team) {
         if (!participantName || participantName.trim() === '') {
             alert("Please enter a valid name.");
+            return;
+        }
+        if (!team) {
+            alert("Please select a team.");
             return;
         }
 
@@ -364,7 +393,8 @@
                 .from('match_participants')
                 .insert([{ 
                     match_id: matchId, 
-                    participant_name: participantName.trim() 
+                    participant_name: participantName.trim(),
+                    team: team
                 }]);
 
             if (participantInsertError) throw participantInsertError;
