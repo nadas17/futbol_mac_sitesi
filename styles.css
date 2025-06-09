@@ -202,7 +202,6 @@ button[type="submit"]:hover,
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
     letter-spacing: 0.03em;
     animation: flowing-gradient 7s linear infinite;
     transition: background 0.3s;
@@ -500,6 +499,32 @@ button[type="submit"]:hover,
   0% { transform: scale(1); }
   60% { transform: scale(1.15); }
   100% { transform: scale(1); }
+}
+
+/* Discussion panel send butonu */
+.comment-submit-btn,
+.discussion-panel button[type="submit"] {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    padding: 10px 0;
+    width: 100%;
+    margin-top: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px 0 #ff3c6f33;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: block;
+}
+
+.comment-submit-btn:hover,
+.discussion-panel button[type="submit"]:hover {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.04);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
 }
 
 /* Form step styles */
