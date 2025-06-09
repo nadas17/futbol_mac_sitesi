@@ -246,20 +246,20 @@
         const teamB = participants.filter(p => p.team === 'B');
 
         participantsList.innerHTML = `
-            <li><strong>A Team</strong></li>
+            <li><strong>Team A</strong></li>
             ${teamA.length > 0 ? teamA.map(p => `
                 <li>
                     ${p.participant_name}
                     <button class="delete-participant" data-id="${p.id}">Delete</button>
                 </li>
-            `).join('') : '<li style="color:#888;">No participants in A Team</li>'}
-            <li><strong>B Team</strong></li>
+            `).join('') : '<li style="color:#888;">No participants in Team A</li>'}
+            <li><strong>Team B</strong></li>
             ${teamB.length > 0 ? teamB.map(p => `
                 <li>
                     ${p.participant_name}
                     <button class="delete-participant" data-id="${p.id}">Delete</button>
                 </li>
-            `).join('') : '<li style="color:#888;">No participants in B Team</li>'}
+            `).join('') : '<li style="color:#888;">No participants in Team B</li>'}
         `;
 
         // Add event listeners to delete buttons
