@@ -358,50 +358,70 @@ button[type="submit"]:hover,
 .discussion-panel {
   margin-top: 15px;
   background: rgba(30, 30, 30, 0.5);
-  padding: 12px;
+  padding: 14px 14px;
   border-radius: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .discussion-panel input[type="text"],
 .discussion-panel textarea {
   width: 100%;
-  margin-bottom: 8px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #333;
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #333;
   background-color: #222;
   color: #eee;
+  font-size: 1rem;
+  box-sizing: border-box;
+  outline: none;
+  resize: vertical;
+  display: block;
 }
 
-.discussion-panel input[type="file"] {
-  margin-bottom: 8px;
-}
-
-.discussion-panel button {
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
-    color: #fff;
-    padding: 10px 0;
-    border: none;
-    border-radius: 7px;
-    font-size: 1rem;
-    width: 100%;
-    max-width: 260px;
-    margin: 10px auto 0 auto;
-    cursor: pointer;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    box-shadow: 0 2px 8px 0 #ff3c6f33;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+.discussion-panel .comment-image-label {
     display: flex;
     align-items: center;
-    justify-content: center;
-    height: 44px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
-.discussion-panel button:hover:not(.uploading) {
-    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
+/* Discussion panel butonları */
+.discussion-panel button {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 10px 0 0 0;
+    padding: 10px 0;
+    border-radius: 7px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 600px) {
+    .discussion-panel {
+        padding: 10px 4px !important;
+        margin: 8px 0 !important;
+        border-radius: 7px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .discussion-panel input[type="text"],
+    .discussion-panel textarea {
+        padding: 9px 7px !important;
+        font-size: 0.97rem !important;
+        margin-bottom: 8px !important;
+    }
+    .discussion-panel button {
+        font-size: 0.97rem !important;
+        margin: 7px 0 0 0 !important;
+    }
 }
 
 /* Update the uploading state to maintain consistent styling */
@@ -594,6 +614,36 @@ button[type="submit"]:hover,
 .message.error {
     background: rgba(255, 60, 111, 0.1);
     color: #ff3c6f;
+}
+
+/* Participants/Quota başlığı için stil */
+.participants-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #00cc4e;
+    font-weight: 700;
+    font-size: 1.07rem;
+    text-align: left;
+    padding: 10px 0 10px 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+}
+
+.participants-toggle .arrow {
+    margin-left: auto;
+    font-size: 1.2em;
+    color: #fff;
+    transition: transform 0.2s;
+}
+
+.participant-count {
+    color: #fff;
+    font-weight: 600;
+    margin: 0 2px;
 }
 
 /* Responsive Design */
