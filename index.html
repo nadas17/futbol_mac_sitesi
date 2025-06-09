@@ -80,6 +80,15 @@
             return;
         }
 
+        // 1. En yakın maçı bul
+        const now = new Date();
+        const upcomingMatches = matches.filter(m => new Date(`${m.match_date}T${m.match_time}`) > now);
+        let nextMatchId = null;
+        if (upcomingMatches.length > 0) {
+            upcomingMatches.sort((a, b) => new Date(`${a.match_date}T${a.match_time}`) - new Date(`${b.match_date}T${b.match_time}`));
+            nextMatchId = upcomingMatches[0].id;
+        }
+
         matchesContainer.innerHTML = '';
         for (const match of matches) {
             const matchElement = document.createElement('div');
@@ -104,6 +113,11 @@
                         ${match.current_players >= match.max_players ? 'disabled' : ''}>
                     ${match.current_players >= match.max_players ? 'Match Full' : 'Join Match'}
                 </button>
+                ${match.id === nextMatchId ? `
+                    <button class="circle-join-anim-btn" data-match-id="${match.id}" title="Join Match">
+                        Join<br>Match
+                    </button>
+                ` : ''}
                 <div class="discussion-panel">
                     <div class="discussion-title">${match.title} - Discussion</div>
                     <label class="comment-image-label">
@@ -139,6 +153,12 @@
                 participantCountSpan.classList.add('full');
             } else {
                 participantCountSpan.classList.remove('full');
+            }
+
+            // Yuvarlak animasyonlu Join Match butonu için event ekle
+            const circleJoinBtn = matchElement.querySelector('.circle-join-anim-btn');
+            if (circleJoinBtn) {
+                circleJoinBtn.onclick = () => showJoinMatchForm(match.id, circleJoinBtn);
             }
         }
         updateCountdown(matches);
