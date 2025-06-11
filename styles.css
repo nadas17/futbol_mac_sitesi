@@ -922,3 +922,961 @@ button[type="submit"]:hover,
     padding-top: 8px;
     overflow-y: auto; /* İçerik taşarsa dikey kaydırma çubuğu göster */
 }
+
+/* Google Maps Styles */
+#map-container {
+    width: 100%;
+    height: 300px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid var(--input-border);
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+/* Location input with autocomplete */
+#location {
+    width: 100%;
+}
+
+/* Map in match cards */
+.map-preview {
+    width: 100%;
+    height: 150px;
+    margin-top: 10px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid var(--input-border);
+}
+
+.location-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.view-on-map-btn {
+    margin-top: 5px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color var(--transition-speed);
+}
+
+.view-on-map-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Modal for map */
+.map-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.map-modal-content {
+    position: relative;
+    background-color: var(--bg-light);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    width: 80%;
+    max-width: 800px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.map-modal-close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.map-modal-close:hover {
+    color: white;
+}
+
+.map-modal-map {
+    width: 100%;
+    height: 400px;
+    border-radius: var(--border-radius);
+    margin-top: 10px;
+}
+
+.form-step input:focus,
+.form-step textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Container ve form adımları için kutu modeli düzeltmesi */
+.container,
+.form-steps,
+.form-step,
+.form-step input,
+.form-step textarea {
+    box-sizing: border-box;
+}
+
+/* Input ve textarea'ların kutuya tam oturması için */
+.form-step input,
+.form-step textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    display: block;
+}
+
+/* Step progress bar */
+.step-progress {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 10px;
+}
+
+.step {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Navigation buttons */
+.form-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.nav-btn,
+#submitBtn {
+    padding: 12px 0;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 260px;
+    margin: 10px auto 0 auto;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px 0 #ff3c6f33;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: block;
+}
+
+.nav-btn:hover,
+#submitBtn:hover {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
+}
+
+/* Error states */
+.invalid {
+    border-color: #ff3c6f !important;
+}
+
+.field-error {
+    color: #ff3c6f;
+    font-size: 14px;
+    margin-top: -15px;
+    margin-bottom: 15px;
+}
+
+/* Message styles */
+.message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.message.success {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+}
+
+.message.error {
+    background: rgba(255, 60, 111, 0.1);
+    color: #ff3c6f;
+}
+
+/* Participants/Quota başlığı için stil */
+.participants-toggle {
+    width: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.08rem;
+    text-align: left;
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px 0 #00cc4e22;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.participants-toggle .arrow {
+    margin-left: auto;
+    font-size: 1.3em;
+    color: #fff;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    display: inline-block;
+}
+
+.participants-toggle.open .arrow {
+    transform: rotate(180deg) scale(1.15);
+    color: #00cc4e;
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 480px) {
+    .layout-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .container {
+        padding: 12px 2vw 10px 2vw;
+        margin: 10px auto;
+        max-width: 98vw;
+    }
+    
+    input, textarea, button[type="submit"], .message {
+        max-width: 98vw;
+        font-size: 0.93rem;
+    }
+    .section-box {
+    background: rgba(24, 24, 24, 0.35);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1.5px solid #232323;
+}
+
+
+
+    .countdown-number {
+    font-size: 1.5rem;
+}
+
+.countdown-number span {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+}
+
+.time-label {
+    font-size: 0.8rem;
+}
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px 4px !important;
+        margin: 0 !important;
+        border-radius: 10px !important;
+        box-sizing: border-box;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .create-match-title {
+        font-size: 1.3rem !important;
+        margin-bottom: 18px !important;
+        padding: 0 2px !important;
+        word-break: break-word;
+    }
+
+    .step-progress-bar {
+        margin-bottom: 18px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .form-steps,
+    .form-step {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .form-step label {
+        font-size: 0.97rem !important;
+        margin-bottom: 6px !important;
+        padding-left: 2px !important;
+    }
+
+    .form-step input,
+    .form-step textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 10px 8px !important;
+        font-size: 1rem !important;
+        margin-bottom: 10px !important;
+        border-radius: 7px !important;
+        box-sizing: border-box;
+    }
+
+    .form-navigation {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .nav-btn,
+    #submitBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 1rem !important;
+        border-radius: 7px !important;
+        margin: 0 !important;
+    }
+
+    .message {
+        margin-top: 14px !important;
+        font-size: 0.97rem !important;
+        padding: 10px 6px !important;
+        border-radius: 7px !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+}
+
+/* Maça katıl formu kutusu */
+.inline-join-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(24, 24, 24, 0.95);
+    border-radius: 10px;
+    padding: 20px 16px;
+    margin: 18px auto 0 auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    border: 1.5px solid #232323;
+    max-width: 340px;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: stretch;
+}
+
+.inline-join-input,
+.inline-join-team {
+    width: 100%;
+    padding: 12px 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 7px;
+    color: #fff;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.inline-join-input:focus,
+.inline-join-team:focus {
+    border-color: var(--primary-color);
+    background: rgba(255,255,255,0.16);
+}
+
+/* Confirm ve Cancel butonları */
+.inline-confirm-button,
+.inline-cancel-button {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    padding: 10px 0;
+    width: 100%;
+    margin-top: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px 0 #ff3c6f33;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: block;
+}
+
+.inline-cancel-button {
+    background: #444;
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.inline-confirm-button:hover {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.04);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
+}
+
+.inline-cancel-button:hover {
+    background: #222;
+}
+
+/* Progress bar ana stil */
+.step-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+}
+
+.step-progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    border-radius: 6px;
+    transition: width 0.3s;
+    width: 0;
+}
+
+/* Mobilde de görünür ve tam genişlikte olsun */
+@media (max-width: 600px) {
+    .step-progress-bar {
+        height: 8px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        margin-bottom: 18px !important;
+        background: rgba(255,255,255,0.15) !important;
+    }
+    .step-progress-bar-inner {
+        height: 100% !important;
+        border-radius: 6px !important;
+    }
+}
+
+/* Yuvarlak animasyonlu Join Match butonu */
+.circle-join-anim-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 18px 0 #ff3c6f33;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    text-align: center;
+    transition: transform 0.18s, box-shadow 0.18s;
+    animation: pulse-join 1.5s infinite;
+    line-height: 1.1;
+}
+
+@keyframes pulse-join {
+    0% { box-shadow: 0 0 0 0 rgba(0,204,78,0.4); }
+    70% { box-shadow: 0 0 0 16px rgba(0,204,78,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,204,78,0.4); }
+}
+
+.circle-join-anim-btn:hover {
+    transform: scale(1.08);
+    background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+    box-shadow: 0 6px 24px 0 #00cc4e55;
+}
+
+/* Accordion animasyonu için */
+.participants-list {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(.4,0,.2,1), opacity 0.25s;
+    will-change: max-height, opacity;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.participants-list.open {
+    max-height: 1000px; /* Yeterli büyük bir değer, gerekirse artırın */
+    opacity: 1;
+    margin-top: 8px;
+    padding-top: 8px;
+    overflow-y: auto; /* İçerik taşarsa dikey kaydırma çubuğu göster */
+}
+
+.form-step input:focus,
+.form-step textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Container ve form adımları için kutu modeli düzeltmesi */
+.container,
+.form-steps,
+.form-step,
+.form-step input,
+.form-step textarea {
+    box-sizing: border-box;
+}
+
+/* Input ve textarea'ların kutuya tam oturması için */
+.form-step input,
+.form-step textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    display: block;
+}
+
+/* Step progress bar */
+.step-progress {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 10px;
+}
+
+.step {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Navigation buttons */
+.form-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.nav-btn,
+#submitBtn {
+    padding: 12px 0;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 260px;
+    margin: 10px auto 0 auto;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px 0 #ff3c6f33;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: block;
+}
+
+.nav-btn:hover,
+#submitBtn:hover {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
+}
+
+/* Error states */
+.invalid {
+    border-color: #ff3c6f !important;
+}
+
+.field-error {
+    color: #ff3c6f;
+    font-size: 14px;
+    margin-top: -15px;
+    margin-bottom: 15px;
+}
+
+/* Message styles */
+.message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.message.success {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+}
+
+.message.error {
+    background: rgba(255, 60, 111, 0.1);
+    color: #ff3c6f;
+}
+
+/* Participants/Quota başlığı için stil */
+.participants-toggle {
+    width: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.08rem;
+    text-align: left;
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px 0 #00cc4e22;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.participants-toggle .arrow {
+    margin-left: auto;
+    font-size: 1.3em;
+    color: #fff;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    display: inline-block;
+}
+
+.participants-toggle.open .arrow {
+    transform: rotate(180deg) scale(1.15);
+    color: #00cc4e;
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 480px) {
+    .layout-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .container {
+        padding: 12px 2vw 10px 2vw;
+        margin: 10px auto;
+        max-width: 98vw;
+    }
+    
+    input, textarea, button[type="submit"], .message {
+        max-width: 98vw;
+        font-size: 0.93rem;
+    }
+    .section-box {
+    background: rgba(24, 24, 24, 0.35);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1.5px solid #232323;
+}
+
+
+
+    .countdown-number {
+    font-size: 1.5rem;
+}
+
+.countdown-number span {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+}
+
+.time-label {
+    font-size: 0.8rem;
+}
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px 4px !important;
+        margin: 0 !important;
+        border-radius: 10px !important;
+        box-sizing: border-box;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .create-match-title {
+        font-size: 1.3rem !important;
+        margin-bottom: 18px !important;
+        padding: 0 2px !important;
+        word-break: break-word;
+    }
+
+    .step-progress-bar {
+        margin-bottom: 18px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .form-steps,
+    .form-step {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .form-step label {
+        font-size: 0.97rem !important;
+        margin-bottom: 6px !important;
+        padding-left: 2px !important;
+    }
+
+    .form-step input,
+    .form-step textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 10px 8px !important;
+        font-size: 1rem !important;
+        margin-bottom: 10px !important;
+        border-radius: 7px !important;
+        box-sizing: border-box;
+    }
+
+    .form-navigation {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .nav-btn,
+    #submitBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 1rem !important;
+        border-radius: 7px !important;
+        margin: 0 !important;
+    }
+
+    .message {
+        margin-top: 14px !important;
+        font-size: 0.97rem !important;
+        padding: 10px 6px !important;
+        border-radius: 7px !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+}
+
+/* Maça katıl formu kutusu */
+.inline-join-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(24, 24, 24, 0.95);
+    border-radius: 10px;
+    padding: 20px 16px;
+    margin: 18px auto 0 auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    border: 1.5px solid #232323;
+    max-width: 340px;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: stretch;
+}
+
+.inline-join-input,
+.inline-join-team {
+    width: 100%;
+    padding: 12px 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 7px;
+    color: #fff;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.inline-join-input:focus,
+.inline-join-team:focus {
+    border-color: var(--primary-color);
+    background: rgba(255,255,255,0.16);
+}
+
+/* Confirm ve Cancel butonları */
+.inline-confirm-button,
+.inline-cancel-button {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    padding: 10px 0;
+    width: 100%;
+    margin-top: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px 0 #ff3c6f33;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: block;
+}
+
+.inline-cancel-button {
+    background: #444;
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.inline-confirm-button:hover {
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary-color));
+    transform: scale(1.04);
+    box-shadow: 0 4px 12px rgba(0, 204, 78, 0.5);
+}
+
+.inline-cancel-button:hover {
+    background: #222;
+}
+
+/* Progress bar ana stil */
+.step-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+}
+
+.step-progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    border-radius: 6px;
+    transition: width 0.3s;
+    width: 0;
+}
+
+/* Mobilde de görünür ve tam genişlikte olsun */
+@media (max-width: 600px) {
+    .step-progress-bar {
+        height: 8px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        margin-bottom: 18px !important;
+        background: rgba(255,255,255,0.15) !important;
+    }
+    .step-progress-bar-inner {
+        height: 100% !important;
+        border-radius: 6px !important;
+    }
+}
+
+/* Yuvarlak animasyonlu Join Match butonu */
+.circle-join-anim-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 18px 0 #ff3c6f33;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    text-align: center;
+    transition: transform 0.18s, box-shadow 0.18s;
+    animation: pulse-join 1.5s infinite;
+    line-height: 1.1;
+}
+
+@keyframes pulse-join {
+    0% { box-shadow: 0 0 0 0 rgba(0,204,78,0.4); }
+    70% { box-shadow: 0 0 0 16px rgba(0,204,78,0); }
+    100% { box-shadow:

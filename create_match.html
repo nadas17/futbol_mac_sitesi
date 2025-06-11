@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places"></script>
 </head>
 <body>
 
@@ -31,7 +33,12 @@
                 </div>
                 <div class="form-step" data-step="3">
                     <label for="location">Location:</label>
-                    <input type="text" id="location" name="location" required>
+                    <input type="text" id="location" name="location" placeholder="Search for a location" required>
+                    <div id="map-container">
+                        <div id="map"></div>
+                    </div>
+                    <input type="hidden" id="location_lat" name="location_lat">
+                    <input type="hidden" id="location_lng" name="location_lng">
                 </div>
                 <div class="form-step" data-step="4">
                     <label for="max_players">Maximum Number of Players:</label>
@@ -72,6 +79,77 @@
             const prevBtn = document.getElementById('prevBtn');
             const submitBtn = document.getElementById('submitBtn');
             const messageDiv = document.getElementById('form-message');
+            
+            // Google Maps değişkenleri
+            let map;
+            let marker;
+            let autocomplete;
+            const locationInput = document.getElementById('location');
+            const locationLat = document.getElementById('location_lat');
+            const locationLng = document.getElementById('location_lng');
+
+            // Google Maps'i başlat
+            function initMap() {
+                // Varsayılan konum (örneğin şehir merkezi)
+                const defaultLocation = { lat: 52.2297, lng: 21.0122 }; // Warsaw
+                
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: defaultLocation,
+                    zoom: 13,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
+                });
+                
+                marker = new google.maps.Marker({
+                    position: defaultLocation,
+                    map: map,
+                    draggable: true
+                });
+                
+                // Marker sürüklendiğinde konum bilgilerini güncelle
+                google.maps.event.addListener(marker, 'dragend', function() {
+                    const position = marker.getPosition();
+                    locationLat.value = position.lat();
+                    locationLng.value = position.lng();
+                    
+                    // Adres bilgisini tersine geocoding ile al
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ 'location': position }, function(results, status) {
+                        if (status === 'OK' && results[0]) {
+                            locationInput.value = results[0].formatted_address;
+                        }
+                    });
+                });
+                
+                // Autocomplete özelliğini ekle
+                autocomplete = new google.maps.places.Autocomplete(locationInput);
+                autocomplete.bindTo('bounds', map);
+                
+                // Yer seçildiğinde haritayı güncelle
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    
+                    if (!place.geometry) {
+                        return;
+                    }
+                    
+                    // Haritayı seçilen konuma merkezle
+                    if (place.geometry.viewport) {
+                        map.fitBounds(place.geometry.viewport);
+                    } else {
+                        map.setCenter(place.geometry.location);
+                        map.setZoom(17);
+                    }
+                    
+                    // Marker'ı güncelle
+                    marker.setPosition(place.geometry.location);
+                    
+                    // Konum bilgilerini kaydet
+                    locationLat.value = place.geometry.location.lat();
+                    locationLng.value = place.geometry.location.lng();
+                });
+            }
 
             function showStep(stepNumber) {
                 formSteps.forEach((step, idx) => {
@@ -85,6 +163,13 @@
                 prevBtn.style.display = stepNumber === 0 ? 'none' : 'block';
                 nextBtn.style.display = stepNumber === totalSteps - 1 ? 'none' : 'block';
                 submitBtn.style.display = stepNumber === totalSteps - 1 ? 'block' : 'none';
+                
+                // Eğer konum adımına gelindiyse haritayı başlat
+                if (stepNumber === 3) {
+                    setTimeout(() => {
+                        initMap();
+                    }, 300); // Adım geçişi animasyonundan sonra haritayı yükle
+                }
             }
 
             nextBtn.addEventListener('click', () => {
@@ -133,6 +218,8 @@
                 const match_date = document.getElementById('match_date').value;
                 const match_time = document.getElementById('match_time').value;
                 const location = document.getElementById('location').value;
+                const location_lat = document.getElementById('location_lat').value;
+                const location_lng = document.getElementById('location_lng').value;
                 const max_players = parseInt(document.getElementById('max_players').value);
                 const priceInput = document.getElementById('price_per_player').value;
                 const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
@@ -145,6 +232,8 @@
                         match_date,
                         match_time,
                         location,
+                        location_lat,
+                        location_lng,
                         max_players,
                         price_per_player,
                         description,

@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places"></script>
 </head>
 <body>
     <div class="layout-container">
@@ -54,6 +56,15 @@
         </div>
     </div>
 
+    <!-- Map Modal -->
+    <div id="map-modal" class="map-modal">
+        <div class="map-modal-content">
+            <span class="map-modal-close">&times;</span>
+            <h3 id="map-modal-title">Location</h3>
+            <div id="map-modal-map" class="map-modal-map"></div>
+        </div>
+    </div>
+
     <script>
     // Replace these with your actual Supabase credentials
     const SUPABASE_URL = 'https://cqmtrzgvtvlxobeyuquu.supabase.co'; // Your Supabase URL
@@ -61,6 +72,10 @@
 
     // Initialize Supabase client
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Google Maps değişkenleri
+    let modalMap;
+    let modalMarker;
 
     /**
      * Fetches matches from the database and displays them on the page.
@@ -93,11 +108,20 @@
         for (const match of matches) {
             const matchElement = document.createElement('div');
             matchElement.className = 'match-card';
+            
+            // Konum bilgisi için container oluştur
+            const locationHtml = match.location_lat && match.location_lng ?
+                `<div class="location-container">
+                    <p><strong>Location:</strong> ${match.location}</p>
+                    <button class="view-on-map-btn" data-lat="${match.location_lat}" data-lng="${match.location_lng}" data-title="${match.title}">View on Map</button>
+                </div>` :
+                `<p><strong>Location:</strong> ${match.location}</p>`;
+            
             matchElement.innerHTML = `
                 <h3>${match.title}</h3>
                 <p><strong>Date:</strong> ${new Date(match.match_date).toLocaleDateString('en-GB')}</p>
                 <p><strong>Time:</strong> ${match.match_time.substring(0, 5)}</p>
-                <p><strong>Location:</strong> ${match.location}</p>
+                ${locationHtml}
                 <p><strong>Description:</strong> ${match.description || ''}</p>
                 <p><strong>Price:</strong> ${match.price_per_player ? match.price_per_player + ' PLN' : 'Free'}</p>
                 <div class="participants-list-accordion">
@@ -150,9 +174,64 @@
                 circleJoinBtn.onclick = () => showJoinMatchForm(match.id, circleJoinBtn);
             }
 
-
+            // Harita görüntüleme butonu için event ekle
+            const viewMapBtn = matchElement.querySelector('.view-on-map-btn');
+            if (viewMapBtn) {
+                viewMapBtn.addEventListener('click', function() {
+                    const lat = parseFloat(this.getAttribute('data-lat'));
+                    const lng = parseFloat(this.getAttribute('data-lng'));
+                    const title = this.getAttribute('data-title');
+                    showLocationOnMap(lat, lng, title);
+                });
+            }
         }
         updateCountdown(matches);
+    }
+
+    /**
+     * Shows the location on a map in a modal.
+     * @param {number} lat - The latitude of the location.
+     * @param {number} lng - The longitude of the location.
+     * @param {string} title - The title of the match.
+     */
+    function showLocationOnMap(lat, lng, title) {
+        const modal = document.getElementById('map-modal');
+        const modalTitle = document.getElementById('map-modal-title');
+        const mapContainer = document.getElementById('map-modal-map');
+        
+        modalTitle.textContent = title + ' - Location';
+        modal.style.display = 'block';
+        
+        // Haritayı oluştur
+        setTimeout(() => {
+            const location = { lat, lng };
+            modalMap = new google.maps.Map(mapContainer, {
+                center: location,
+                zoom: 15,
+                mapTypeControl: false,
+                streetViewControl: true,
+                fullscreenControl: true
+            });
+            
+            modalMarker = new google.maps.Marker({
+                position: location,
+                map: modalMap,
+                title: title
+            });
+        }, 100); // Modalın açılmasını bekle
+        
+        // Modal kapatma
+        const closeBtn = document.querySelector('.map-modal-close');
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        };
+        
+        // Modal dışına tıklayınca kapat
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
     }
 
     /**
@@ -199,7 +278,7 @@
             addParticipantToMatch(matchId, participantName, team);
             // Remove the form and show the original button
             formContainer.remove();
-            buttonElement.style.display = ''; // Show the original button
+            buttonElement.style.display = 'block';
         };
         formContainer.appendChild(confirmButton);
 
@@ -208,13 +287,17 @@
         cancelButton.textContent = 'Cancel';
         cancelButton.className = 'inline-cancel-button';
         cancelButton.onclick = () => {
+            // Remove the form and show the original button
             formContainer.remove();
-            buttonElement.style.display = '';
+            buttonElement.style.display = 'block';
         };
         formContainer.appendChild(cancelButton);
 
-        // Insert the form container after the hidden button
+        // Insert the form after the button
         buttonElement.parentNode.insertBefore(formContainer, buttonElement.nextSibling);
+
+        // Focus on the input field
+        inputField.focus();
     }
 
     /**
