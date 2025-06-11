@@ -223,13 +223,13 @@ button[type="submit"]:hover,
 /* Delete Button */
 /* Hide delete button by default, show on li hover */
 .delete-participant {
-    display: none;
     background: none;
     border: none;
     font-size: 1.5rem; /* Cross symbol size */
     cursor: pointer;
-    opacity: 0.4; /* Subtly visible by default */
-    transition: opacity 0.3s ease, color 0.3s ease;
+    opacity: 0; /* Başlangıçta gizli */
+    visibility: hidden; /* Başlangıçta gizli */
+    transition: opacity 0.3s ease, color 0.3s ease, visibility 0.3s ease;
     color: #ccc; /* Default color slightly muted */
     padding: 0 5px; /* Easier click target */
     margin: 0;
@@ -241,8 +241,8 @@ button[type="submit"]:hover,
 }
 
 .participants-list li:hover .delete-participant {
-    display: inline;
     opacity: 1;
+    visibility: visible;
 }
 
 .delete-participant:hover {
@@ -284,14 +284,16 @@ button[type="submit"]:hover,
     background: rgba(30, 30, 30, 0.3);
     border-radius: 6px;
     border: 1.5px solid #232323; /* Katılımcı listesine border */
+    overflow-x: hidden; /* Yatay taşmayı engelle */
 }
 
-.participants-list ul {
+/* index.html'deki yapıya göre .participants-list zaten bir ul, bu yüzden bu selector gereksiz. */
+/* .participants-list ul {
     list-style: none;
     padding: 0;
     margin: 0;
     display: block;
-}
+} */
 
 .participants-list li {
     background: rgba(255, 255, 255, 0.03); /* More subtle background for dark theme */
@@ -305,6 +307,7 @@ button[type="submit"]:hover,
     border: none; /* Remove the full green border */
     border-bottom: 1px solid #333; /* Subtle separator line */
     /* margin-bottom is removed as border-bottom will handle separation */
+    word-break: break-all; /* Uzun kelimelerin taşmasını engelle */
 }
 
 .participants-list li:last-child {
@@ -913,8 +916,9 @@ button[type="submit"]:hover,
 }
 
 .participants-list.open {
-    max-height: 500px; /* Yeterli büyük bir değer, gerekirse artırın */
+    max-height: 1000px; /* Yeterli büyük bir değer, gerekirse artırın */
     opacity: 1;
     margin-top: 8px;
     padding-top: 8px;
+    overflow-y: auto; /* İçerik taşarsa dikey kaydırma çubuğu göster */
 }
