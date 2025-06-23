@@ -355,18 +355,24 @@
                 }
             }
             
-            const joinButton = matchCard.querySelector('.join-match-btn');
-            const maxPlayers = parseInt(matchCard.querySelector('.participant-count').dataset.maxPlayers);
-            
-            // Update button state
-            if (participants.length >= maxPlayers) {
-                joinButton.disabled = true;
-                joinButton.classList.add('disabled');
-                joinButton.textContent = 'Match Full';
-            } else {
-                joinButton.disabled = false;
-                joinButton.classList.remove('disabled');
-                joinButton.textContent = 'Join Match';
+            const joinButton = matchCard.querySelector('.request-join-btn');
+            const participantCountElem = matchCard.querySelector('.participant-count');
+            let maxPlayers = 0;
+            if (participantCountElem) {
+                maxPlayers = parseInt(participantCountElem.dataset.maxPlayers);
+                if (participants.length >= maxPlayers) {
+                    if (joinButton) {
+                        joinButton.disabled = true;
+                        joinButton.classList.add('disabled');
+                        joinButton.textContent = 'Match Full';
+                    }
+                } else {
+                    if (joinButton) {
+                        joinButton.disabled = false;
+                        joinButton.classList.remove('disabled');
+                        joinButton.textContent = 'Join Match';
+                    }
+                }
             }
         }
 
