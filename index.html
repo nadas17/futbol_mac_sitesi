@@ -17,7 +17,7 @@
             // Gerekirse burada ek başlatma kodu ekleyebilirsiniz
         }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initGoogleMaps" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASlSPjEVAHrRx1hy0KOltskpiV6cY_zyQ&libraries=places&callback=initGoogleMaps" async defer></script>
 </head>
 <body>
     <div class="layout-container">
@@ -70,6 +70,8 @@
             <div id="map-modal-map" class="map-modal-map"></div>
         </div>
     </div>
+
+    <a href="create_match.html" class="floating-button" title="Create New Match">＋</a>
 
     <script>
     // Replace these with your actual Supabase credentials
@@ -203,9 +205,10 @@
      * @param {string} title - The title of the match.
      */
     function showLocationOnMap(lat, lng, title) {
-        // Google Maps yüklenmiş mi kontrol et
+        // API kontrolü
         if (typeof google === 'undefined' || !google.maps) {
-            alert('Google Maps could not be loaded. Please try again later.');
+            console.error('Google Maps API not loaded correctly');
+            alert('Harita yüklenirken hata oluştu. Sayfayı yenileyip tekrar deneyin.');
             return;
         }
 
@@ -216,17 +219,24 @@
         modalTitle.textContent = title + ' - Location';
         modal.style.display = 'block';
         
-        // Haritayı oluştur
+        // Haritayı oluşturmadan önce container'ın görünür olmasını sağla
         setTimeout(() => {
             try {
+                // Harita konteyner boyutlarını kontrol et
+                if (mapContainer.offsetWidth === 0 || mapContainer.offsetHeight === 0) {
+                    mapContainer.style.width = '100%';
+                    mapContainer.style.height = '400px'; // Minimum gerekli yükseklik
+                }
+                
                 const location = { lat, lng };
                 modalMap = new google.maps.Map(mapContainer, {
                     center: location,
                     zoom: 15,
-                    mapTypeControl: false,
-                    streetViewControl: true,
-                    fullscreenControl: true
+                    mapTypeControl: false
                 });
+                
+                // Haritanın boyut değişikliklerini algılamasını sağla
+                google.maps.event.trigger(modalMap, 'resize');
                 
                 modalMarker = new google.maps.Marker({
                     position: location,
@@ -235,10 +245,10 @@
                 });
             } catch (error) {
                 console.error('Error creating map:', error);
-                alert('Error loading map. Please try again.');
+                alert('Harita oluşturulurken bir hata oluştu.');
                 modal.style.display = 'none';
             }
-        }, 200); // Modalın tamamen açılmasını bekle
+        }, 300); // Daha uzun bir süre bekle
         
         // Modal kapatma
         const closeBtn = document.querySelector('.map-modal-close');
@@ -702,8 +712,7 @@
     
     
     </script>
-    <a href="create_match.html" class="floating-button" title="Create New Match">＋</a>
-
+    
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
       AOS.init();
