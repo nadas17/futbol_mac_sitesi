@@ -10,8 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places"></script>
+    <!-- Google Maps API - Callback fonksiyonu eklendi -->
+    <script>
+        function initGoogleMaps() {
+            console.log('Google Maps API loaded successfully');
+            // Gerekirse burada ek başlatma kodu ekleyebilirsiniz
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initGoogleMaps" async defer></script>
 </head>
 <body>
     <div class="layout-container">
@@ -124,6 +130,7 @@
                 ${locationHtml}
                 <p><strong>Description:</strong> ${match.description || ''}</p>
                 <p><strong>Price:</strong> ${match.price_per_player ? match.price_per_player + ' PLN' : 'Free'}</p>
+                <p><strong>Created by:</strong> ${match.creator_nickname || 'Anonymous'}</p>
                 <div class="participants-list-accordion">
                     <button class="participants-toggle">Participants/Quota: 
                         <span class="participant-count" data-max-players="${match.max_players}">${match.current_players}</span>
@@ -132,14 +139,15 @@
                     </button>
                     <ul id="participants-${match.id}" class="participants-list">Loading...</ul>
                 </div>
-                <button class="join-match-btn" 
+                <button class="request-join-btn" 
                         data-match-id="${match.id}"
+                        data-creator-id="${match.creator_id}"
                         ${match.current_players >= match.max_players ? 'disabled' : ''}>
-                    ${match.current_players >= match.max_players ? 'Match Full' : 'Join Match'}
+                    ${match.current_players >= match.max_players ? 'Match Full' : 'Request to Join'}
                 </button>
                 ${match.id === nextMatchId ? `
-                    <button class="circle-join-anim-btn" data-match-id="${match.id}" title="Join Match">
-                        Join<br>Match
+                    <button class="circle-join-anim-btn" data-match-id="${match.id}" title="Request to Join">
+                        Request<br>Join
                     </button>
                 ` : ''}
 
@@ -147,8 +155,8 @@
             matchesContainer.appendChild(matchElement);
 
             // Store button a variable to be able to hide/show it
-            const joinButton = matchElement.querySelector('.join-match-btn');
-            joinButton.onclick = () => showJoinMatchForm(match.id, joinButton);
+            const requestButton = matchElement.querySelector('.request-join-btn');
+            requestButton.onclick = () => showJoinRequestForm(match.id, match.creator_id, requestButton);
             fetchParticipants(match.id);
 
             // Accordion aç/kapa
@@ -195,6 +203,12 @@
      * @param {string} title - The title of the match.
      */
     function showLocationOnMap(lat, lng, title) {
+        // Google Maps yüklenmiş mi kontrol et
+        if (typeof google === 'undefined' || !google.maps) {
+            alert('Google Maps could not be loaded. Please try again later.');
+            return;
+        }
+
         const modal = document.getElementById('map-modal');
         const modalTitle = document.getElementById('map-modal-title');
         const mapContainer = document.getElementById('map-modal-map');
@@ -204,21 +218,27 @@
         
         // Haritayı oluştur
         setTimeout(() => {
-            const location = { lat, lng };
-            modalMap = new google.maps.Map(mapContainer, {
-                center: location,
-                zoom: 15,
-                mapTypeControl: false,
-                streetViewControl: true,
-                fullscreenControl: true
-            });
-            
-            modalMarker = new google.maps.Marker({
-                position: location,
-                map: modalMap,
-                title: title
-            });
-        }, 100); // Modalın açılmasını bekle
+            try {
+                const location = { lat, lng };
+                modalMap = new google.maps.Map(mapContainer, {
+                    center: location,
+                    zoom: 15,
+                    mapTypeControl: false,
+                    streetViewControl: true,
+                    fullscreenControl: true
+                });
+                
+                modalMarker = new google.maps.Marker({
+                    position: location,
+                    map: modalMap,
+                    title: title
+                });
+            } catch (error) {
+                console.error('Error creating map:', error);
+                alert('Error loading map. Please try again.');
+                modal.style.display = 'none';
+            }
+        }, 200); // Modalın tamamen açılmasını bekle
         
         // Modal kapatma
         const closeBtn = document.querySelector('.map-modal-close');
@@ -560,3 +580,127 @@
     </script>
 </body>
 </html>
+
+/**
+ * Shows an inline form for requesting to join a match.
+ * @param {number} matchId - The ID of the match to join.
+ * @param {string} creatorId - The ID of the match creator.
+ * @param {HTMLElement} buttonElement - The "Request to Join" button element.
+ */
+function showJoinRequestForm(matchId, creatorId, buttonElement) {
+    // Hide the original "Request to Join" button
+    buttonElement.style.display = 'none';
+
+    // Create a container for the inline form
+    const formContainer = document.createElement('div');
+    formContainer.className = 'inline-join-form-container';
+
+    // Create input field for name
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Enter your name';
+    nameInput.className = 'inline-join-input';
+    formContainer.appendChild(nameInput);
+
+    // Create input field for message
+    const messageInput = document.createElement('textarea');
+    messageInput.placeholder = 'Enter a message for the match creator';
+    messageInput.className = 'inline-join-message';
+    formContainer.appendChild(messageInput);
+
+    // Team selection
+    const teamSelect = document.createElement('select');
+    teamSelect.className = 'inline-join-team';
+    teamSelect.innerHTML = `
+        <option value="" disabled selected>Select Team</option>
+        <option value="A">A Team</option>
+        <option value="B">B Team</option>
+    `;
+    formContainer.appendChild(teamSelect);
+
+    // Create "Send Request" button
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = 'Send Request';
+    confirmButton.className = 'inline-confirm-button';
+    confirmButton.onclick = () => {
+        const participantName = nameInput.value;
+        const message = messageInput.value;
+        const team = teamSelect.value;
+        if (!team) {
+            alert('Please select a team!');
+            return;
+        }
+        sendJoinRequest(matchId, creatorId, participantName, message, team);
+        // Remove the form and show the original button
+        formContainer.remove();
+        buttonElement.style.display = 'block';
+    };
+    formContainer.appendChild(confirmButton);
+
+    // Create "Cancel" button
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.className = 'inline-cancel-button';
+    cancelButton.onclick = () => {
+        formContainer.remove();
+        buttonElement.style.display = 'block';
+    };
+    formContainer.appendChild(cancelButton);
+
+    // Insert the form after the button
+    buttonElement.parentNode.insertBefore(formContainer, buttonElement.nextSibling);
+
+    // Focus on the name input field
+    nameInput.focus();
+}
+
+/**
+ * Sends a join request for a match.
+ * @param {number} matchId - The ID of the match to join.
+ * @param {string} creatorId - The ID of the match creator.
+ * @param {string} participantName - The name of the participant.
+ * @param {string} message - The message for the match creator.
+ * @param {string} team - The selected team (A or B).
+ */
+async function sendJoinRequest(matchId, creatorId, participantName, message, team) {
+    if (!participantName || participantName.trim() === '') {
+        alert("Please enter a valid name.");
+        return;
+    }
+
+    try {
+        // Check for existing requests from this participant
+        const { data: existingRequests, error: checkError } = await supabase
+            .from('join_requests')
+            .select('*')
+            .eq('match_id', matchId)
+            .eq('participant_name', participantName.trim());
+
+        if (checkError) throw checkError;
+
+        if (existingRequests && existingRequests.length > 0) {
+            alert('You have already sent a request to join this match!');
+            return;
+        }
+
+        // Send the join request
+        const { error: requestError } = await supabase
+            .from('join_requests')
+            .insert([{
+                match_id: matchId,
+                creator_id: creatorId,
+                participant_name: participantName.trim(),
+                message: message.trim(),
+                team: team,
+                status: 'pending'
+            }]);
+
+        if (requestError) throw requestError;
+
+        alert('Your request to join the match has been sent!');
+
+    } catch (error) {
+        console.error('Error sending join request:', error);
+        alert('An error occurred while sending your request.');
+    }
+}

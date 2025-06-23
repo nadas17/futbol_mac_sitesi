@@ -7,8 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places"></script>
+    
+    <!-- Google Maps API - Callback ve async/defer eklendi -->
+    <script>
+        function initGoogleMapsAPI() {
+            console.log('Google Maps API loaded successfully');
+            // API yüklendiğinde harita başlatma fonksiyonunu çağır
+            if (typeof window.initMapWhenReady === 'function') {
+                window.initMapWhenReady();
+            }
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initGoogleMapsAPI" async defer></script>
 </head>
 <body>
 
@@ -52,6 +62,10 @@
                     <label for="description">Description:</label>
                     <textarea id="description" name="description" rows="3"></textarea>
                 </div>
+                <div class="form-step" data-step="7">
+                    <label for="creator_nickname">Your Nickname:</label>
+                    <input type="text" id="creator_nickname" name="creator_nickname" required>
+                </div>
             </div>
             <div class="form-navigation">
                 <button type="button" id="prevBtn" class="nav-btn" style="display: none;">Previous</button>
@@ -90,66 +104,88 @@
 
             // Google Maps'i başlat
             function initMap() {
-                // Varsayılan konum (örneğin şehir merkezi)
-                const defaultLocation = { lat: 52.2297, lng: 21.0122 }; // Warsaw
-                
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: defaultLocation,
-                    zoom: 13,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: false
-                });
-                
-                marker = new google.maps.Marker({
-                    position: defaultLocation,
-                    map: map,
-                    draggable: true
-                });
-                
-                // Marker sürüklendiğinde konum bilgilerini güncelle
-                google.maps.event.addListener(marker, 'dragend', function() {
-                    const position = marker.getPosition();
-                    locationLat.value = position.lat();
-                    locationLng.value = position.lng();
+                // Google Maps API'nin yüklenip yüklenmediğini kontrol et
+                if (typeof google === 'undefined' || !google.maps) {
+                    console.error('Google Maps API not loaded');
+                    showMessage('Google Maps could not be loaded. Please refresh the page.', 'error');
+                    return;
+                }
+
+                try {
+                    // Varsayılan konum (örneğin şehir merkezi)
+                    const defaultLocation = { lat: 52.2297, lng: 21.0122 }; // Warsaw
                     
-                    // Adres bilgisini tersine geocoding ile al
-                    const geocoder = new google.maps.Geocoder();
-                    geocoder.geocode({ 'location': position }, function(results, status) {
-                        if (status === 'OK' && results[0]) {
-                            locationInput.value = results[0].formatted_address;
-                        }
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        center: defaultLocation,
+                        zoom: 13,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        fullscreenControl: false
                     });
-                });
-                
-                // Autocomplete özelliğini ekle
-                autocomplete = new google.maps.places.Autocomplete(locationInput);
-                autocomplete.bindTo('bounds', map);
-                
-                // Yer seçildiğinde haritayı güncelle
-                autocomplete.addListener('place_changed', function() {
-                    const place = autocomplete.getPlace();
                     
-                    if (!place.geometry) {
-                        return;
-                    }
+                    marker = new google.maps.Marker({
+                        position: defaultLocation,
+                        map: map,
+                        draggable: true
+                    });
                     
-                    // Haritayı seçilen konuma merkezle
-                    if (place.geometry.viewport) {
-                        map.fitBounds(place.geometry.viewport);
-                    } else {
-                        map.setCenter(place.geometry.location);
-                        map.setZoom(17);
-                    }
+                    // Marker sürüklendiğinde konum bilgilerini güncelle
+                    google.maps.event.addListener(marker, 'dragend', function() {
+                        const position = marker.getPosition();
+                        locationLat.value = position.lat();
+                        locationLng.value = position.lng();
+                        
+                        // Adres bilgisini tersine geocoding ile al
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ 'location': position }, function(results, status) {
+                            if (status === 'OK' && results[0]) {
+                                locationInput.value = results[0].formatted_address;
+                            }
+                        });
+                    });
                     
-                    // Marker'ı güncelle
-                    marker.setPosition(place.geometry.location);
+                    // Autocomplete özelliğini ekle
+                    autocomplete = new google.maps.places.Autocomplete(locationInput);
+                    autocomplete.bindTo('bounds', map);
                     
-                    // Konum bilgilerini kaydet
-                    locationLat.value = place.geometry.location.lat();
-                    locationLng.value = place.geometry.location.lng();
-                });
+                    // Yer seçildiğinde haritayı güncelle
+                    autocomplete.addListener('place_changed', function() {
+                        const place = autocomplete.getPlace();
+                        
+                        if (!place.geometry) {
+                            return;
+                        }
+                        
+                        // Haritayı seçilen konuma merkezle
+                        if (place.geometry.viewport) {
+                            map.fitBounds(place.geometry.viewport);
+                        } else {
+                            map.setCenter(place.geometry.location);
+                            map.setZoom(17);
+                        }
+                        
+                        // Marker'ı güncelle
+                        marker.setPosition(place.geometry.location);
+                        
+                        // Konum bilgilerini kaydet
+                        locationLat.value = place.geometry.location.lat();
+                        locationLng.value = place.geometry.location.lng();
+                    });
+
+                    console.log('Google Maps initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing Google Maps:', error);
+                    showMessage('Error loading map. Please refresh the page.', 'error');
+                }
             }
+
+            // Google Maps API yüklendiğinde çağrılacak fonksiyon
+            window.initMapWhenReady = function() {
+                // Eğer konum adımındaysak haritayı hemen başlat
+                if (currentStep === 3) {
+                    setTimeout(initMap, 100);
+                }
+            };
 
             function showStep(stepNumber) {
                 formSteps.forEach((step, idx) => {
@@ -164,10 +200,14 @@
                 nextBtn.style.display = stepNumber === totalSteps - 1 ? 'none' : 'block';
                 submitBtn.style.display = stepNumber === totalSteps - 1 ? 'block' : 'none';
                 
-                // Eğer konum adımına gelindiyse haritayı başlat
+                // Eğer konum adımına gelindiyse ve Google Maps API yüklendiyse haritayı başlat
                 if (stepNumber === 3) {
                     setTimeout(() => {
-                        initMap();
+                        if (typeof google !== 'undefined' && google.maps) {
+                            initMap();
+                        } else {
+                            console.log('Waiting for Google Maps API to load...');
+                        }
                     }, 300); // Adım geçişi animasyonundan sonra haritayı yükle
                 }
             }
@@ -213,44 +253,54 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Creating...';
 
-                // Form verilerini topla
-                const title = document.getElementById('title').value;
-                const match_date = document.getElementById('match_date').value;
-                const match_time = document.getElementById('match_time').value;
-                const location = document.getElementById('location').value;
-                const location_lat = document.getElementById('location_lat').value;
-                const location_lng = document.getElementById('location_lng').value;
-                const max_players = parseInt(document.getElementById('max_players').value);
-                const priceInput = document.getElementById('price_per_player').value;
-                const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
-                const description = document.getElementById('description').value || null;
+                try {
+                    // Form verilerini topla
+                    const title = document.getElementById('title').value;
+                    const match_date = document.getElementById('match_date').value;
+                    const match_time = document.getElementById('match_time').value;
+                    const location = document.getElementById('location').value;
+                    const location_lat = document.getElementById('location_lat').value;
+                    const location_lng = document.getElementById('location_lng').value;
+                    const max_players = parseInt(document.getElementById('max_players').value);
+                    const priceInput = document.getElementById('price_per_player').value;
+                    const price_per_player = priceInput === '' || parseFloat(priceInput) === 0 ? null : parseFloat(priceInput);
+                    const description = document.getElementById('description').value || null;
+                    const creator_nickname = document.getElementById('creator_nickname').value;
+                    const creator_id = self.crypto.randomUUID(); // Rastgele bir creator_id oluştur
 
-                const { data, error } = await supabaseClient
-                    .from('matches')
-                    .insert([{
-                        title,
-                        match_date,
-                        match_time,
-                        location,
-                        location_lat,
-                        location_lng,
-                        max_players,
-                        price_per_player,
-                        description,
-                        current_players: 0
-                    }]);
+                    const { data, error } = await supabaseClient
+                        .from('matches')
+                        .insert([{
+                            title,
+                            match_date,
+                            match_time,
+                            location,
+                            location_lat,
+                            location_lng,
+                            max_players,
+                            price_per_player,
+                            description,
+                            current_players: 0,
+                            creator_id, // creator_id'yi ekle
+                            creator_nickname // creator_nickname'ı ekle
+                        }]);
 
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Match';
+                    if (error) {
+                        throw new Error(error.message);
+                    }
 
-                if (error) {
-                    showMessage('Failed to create match: ' + error.message, 'error');
-                } else {
                     showMessage('Match created successfully!', 'success');
                     form.reset();
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 2000);
+
+                } catch (error) {
+                    console.error('Error creating match:', error);
+                    showMessage('Failed to create match: ' + error.message, 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Match';
                 }
             });
 
