@@ -25,6 +25,7 @@
             callback: "initGoogleMapsAPI"
         });
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASlSPjEVAHrRx1hy0KOltskpiV6cY_zyQ&libraries=places&callback=initGoogleMapsAPI" async defer></script>
 </head>
 <body>
 
@@ -109,80 +110,67 @@
             const locationLng = document.getElementById('location_lng');
 
             // Google Maps'i başlat
-            function initMap() {
-                // Google Maps API'nin yüklenip yüklenmediğini kontrol et
-                if (typeof google === 'undefined' || !google.maps) {
-                    console.error('Google Maps API not loaded');
-                    showMessage('Google Maps could not be loaded. Please refresh the page.', 'error');
-                    return;
-                }
+            async function initMap() {
+                // Modern Google Maps JS API ile harita başlatma
+                const { Map } = await google.maps.importLibrary("maps");
+                const { Marker } = await google.maps.importLibrary("marker");
+                const { Places } = await google.maps.importLibrary("places");
 
-                try {
-                    // Varsayılan konum (örneğin şehir merkezi)
-                    const defaultLocation = { lat: 52.2297, lng: 21.0122 }; // Warsaw
+                const defaultLocation = { lat: 52.2297, lng: 21.0122 };
+                map = new Map(document.getElementById('map'), {
+                    center: defaultLocation,
+                    zoom: 13
+                });
+                marker = new Marker({
+                    position: defaultLocation,
+                    map: map,
+                    draggable: true
+                });
+                
+                // Marker sürüklendiğinde konum bilgilerini güncelle
+                google.maps.event.addListener(marker, 'dragend', function() {
+                    const position = marker.getPosition();
+                    locationLat.value = position.lat();
+                    locationLng.value = position.lng();
                     
-                    map = new google.maps.Map(document.getElementById('map'), {
-                        center: defaultLocation,
-                        zoom: 13,
-                        mapTypeControl: false,
-                        streetViewControl: false,
-                        fullscreenControl: false
-                    });
-                    
-                    marker = new google.maps.Marker({
-                        position: defaultLocation,
-                        map: map,
-                        draggable: true
-                    });
-                    
-                    // Marker sürüklendiğinde konum bilgilerini güncelle
-                    google.maps.event.addListener(marker, 'dragend', function() {
-                        const position = marker.getPosition();
-                        locationLat.value = position.lat();
-                        locationLng.value = position.lng();
-                        
-                        // Adres bilgisini tersine geocoding ile al
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode({ 'location': position }, function(results, status) {
-                            if (status === 'OK' && results[0]) {
-                                locationInput.value = results[0].formatted_address;
-                            }
-                        });
-                    });
-                    
-                    // Autocomplete özelliğini ekle
-                    autocomplete = new google.maps.places.Autocomplete(locationInput);
-                    autocomplete.bindTo('bounds', map);
-                    
-                    // Yer seçildiğinde haritayı güncelle
-                    autocomplete.addListener('place_changed', function() {
-                        const place = autocomplete.getPlace();
-                        
-                        if (!place.geometry) {
-                            return;
+                    // Adres bilgisini tersine geocoding ile al
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ 'location': position }, function(results, status) {
+                        if (status === 'OK' && results[0]) {
+                            locationInput.value = results[0].formatted_address;
                         }
-                        
-                        // Haritayı seçilen konuma merkezle
-                        if (place.geometry.viewport) {
-                            map.fitBounds(place.geometry.viewport);
-                        } else {
-                            map.setCenter(place.geometry.location);
-                            map.setZoom(17);
-                        }
-                        
-                        // Marker'ı güncelle
-                        marker.setPosition(place.geometry.location);
-                        
-                        // Konum bilgilerini kaydet
-                        locationLat.value = place.geometry.location.lat();
-                        locationLng.value = place.geometry.location.lng();
                     });
+                });
+                
+                // Autocomplete özelliğini ekle
+                autocomplete = new google.maps.places.Autocomplete(locationInput);
+                autocomplete.bindTo('bounds', map);
+                
+                // Yer seçildiğinde haritayı güncelle
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    
+                    if (!place.geometry) {
+                        return;
+                    }
+                    
+                    // Haritayı seçilen konuma merkezle
+                    if (place.geometry.viewport) {
+                        map.fitBounds(place.geometry.viewport);
+                    } else {
+                        map.setCenter(place.geometry.location);
+                        map.setZoom(17);
+                    }
+                    
+                    // Marker'ı güncelle
+                    marker.setPosition(place.geometry.location);
+                    
+                    // Konum bilgilerini kaydet
+                    locationLat.value = place.geometry.location.lat();
+                    locationLng.value = place.geometry.location.lng();
+                });
 
-                    console.log('Google Maps initialized successfully');
-                } catch (error) {
-                    console.error('Error initializing Google Maps:', error);
-                    showMessage('Error loading map. Please refresh the page.', 'error');
-                }
+                console.log('Google Maps initialized successfully');
             }
 
             // Google Maps API yüklendiğinde çağrılacak fonksiyon
@@ -254,8 +242,18 @@
 
             // Form submit
             form.addEventListener('submit', async (event) => {
-                event.preventDefault(); // Normal form gönderimini engelle
-                
+                event.preventDefault();
+
+                // --- GİZLİ ADIMLARDAKİ required ALANLARI GEÇİCİ OLARAK KALDIR ---
+                formSteps.forEach((step, idx) => {
+                    if (!step.classList.contains('active')) {
+                        step.querySelectorAll('[required]').forEach(input => {
+                            input.dataset.wasRequired = "true";
+                            input.required = false;
+                        });
+                    }
+                });
+
                 // Tüm gerekli alanların dolu olup olmadığını kontrol et
                 let allValid = true;
                 let firstInvalidStep = -1;
@@ -330,6 +328,14 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Create Match';
                 }
+
+                // --- SUBMIT SONRASINDA required ALANLARI GERİ YÜKLE ---
+                formSteps.forEach((step, idx) => {
+                    step.querySelectorAll('[data-was-required]').forEach(input => {
+                        input.required = true;
+                        delete input.dataset.wasRequired;
+                    });
+                });
             });
 
             function showMessage(msg, type) {
