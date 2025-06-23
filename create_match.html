@@ -219,8 +219,10 @@
             }
 
             nextBtn.addEventListener('click', () => {
+                // Sadece mevcut adımdaki alanları doğrula, tüm formu değil
                 const fields = formSteps[currentStep].querySelectorAll('input, textarea');
                 let valid = true;
+                
                 fields.forEach(field => {
                     field.classList.remove('invalid');
                     if (field.required && !field.value.trim()) {
@@ -228,7 +230,12 @@
                         valid = false;
                     }
                 });
-                if (!valid) return;
+                
+                if (!valid) {
+                    // Hata mesajı göster
+                    showMessage('Please fill out all required fields', 'error');
+                    return;
+                }
 
                 if (currentStep < totalSteps - 1) {
                     currentStep++;
@@ -247,15 +254,30 @@
 
             // Form submit
             form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                // Son adım validasyonu
-                const lastInput = formSteps[currentStep].querySelector('input, textarea');
-                if (lastInput && !lastInput.value.trim()) {
-                    lastInput.classList.add('invalid');
+                event.preventDefault(); // Normal form gönderimini engelle
+                
+                // Tüm gerekli alanların dolu olup olmadığını kontrol et
+                let allValid = true;
+                let firstInvalidStep = -1;
+                
+                formSteps.forEach((step, idx) => {
+                    const fields = step.querySelectorAll('input[required], textarea[required]');
+                    fields.forEach(field => {
+                        if (!field.value.trim()) {
+                            allValid = false;
+                            if (firstInvalidStep === -1) firstInvalidStep = idx;
+                        }
+                    });
+                });
+                
+                if (!allValid) {
+                    // İlk geçersiz adıma git
+                    currentStep = firstInvalidStep;
+                    showStep(currentStep);
+                    showMessage('Please complete all required fields', 'error');
                     return;
                 }
-
+                
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Creating...';
 
